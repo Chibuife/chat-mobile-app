@@ -1,16 +1,19 @@
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import Button from '@/components/Button'
 import Input from '@/components/Input'
 import { ThemedText } from '@/components/ThemedText'
 import Icon from 'react-native-vector-icons/AntDesign';
+import { useRouter } from 'expo-router'
 
 const resetpassword = () => {
     const [email, setEmail] = useState('');
-
+    const router = useRouter()
     return (
         <SafeAreaView style={styles.container}>
-            <Icon name="rocket" size={30} color="#1877F2" />
+            <TouchableOpacity onPress={()=> router.back()} style={{marginBottom:20}}>
+                <Icon name="arrowleft" size={20} color="#1877F2" />
+            </TouchableOpacity>
             <ThemedText type='title' style={{ color: '#1877F2', paddingLeft: 20, paddingTop: 10 }}>Reset Password</ThemedText>
             <View style={styles.subContainer}>
                 <Input placeholder={'E-mail'} style={{ width: '90%' }} value={email} func={(text: any) => setEmail(text.target.value)} />
@@ -28,7 +31,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white'
     },
     subContainer: {
-        flex:0.7,
+        flex: 0.7,
         justifyContent: 'center',
         alignItems: 'center',
         gap: 20,

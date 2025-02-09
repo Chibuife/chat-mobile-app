@@ -1,4 +1,4 @@
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import { ThemedView } from '@/components/ThemedView'
 import Button from '@/components/Button'
@@ -8,6 +8,11 @@ import LoginWithEmail from '@/components/Auth/LoginWithEmail'
 import RegisterWithEmail from '@/components/Auth/RegisterWithEmail'
 import RegisterWithPhoneNumber from '@/components/Auth/RegisterWithPhoneNumber'
 import Input from '@/components/Input'
+import Icon from 'react-native-vector-icons/AntDesign';
+import { useRouter } from 'expo-router'
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import * as ImagePicker from 'expo-image-picker';
 
 const register = () => {
     const [registerWith, setRegisterWith] = useState('phone')
@@ -15,14 +20,40 @@ const register = () => {
         firstName: '',
         lastName: '',
     })
+    const router = useRouter()
+    const [image, setImage] = useState<string | null>(null);
+
+    const pickImage = async () => {
+        // No permissions request is necessary for launching the image library
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+
+        console.log(result);
+
+        if (!result.canceled) {
+            setImage(result.assets[0].uri);
+        }
+    };
     return (
-        <SafeAreaView style={{flex:1}}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+            <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 20 }}>
+                <Icon name="arrowleft" size={20} color="#1877F2" />
+            </TouchableOpacity>
             <ThemedView style={styles.container}>
                 <ThemedText type='title' style={{ color: '#1877F2', paddingLeft: 20, paddingTop: 10 }}>Create new account</ThemedText>
                 <View style={styles.subContent}>
                     <View style={styles.profileImageContainer}>
-                        <View style={styles.imageContainer}></View>
-                        <View style={styles.picIcon}></View>
+                        {image ? <Image source={{ uri: image }} style={styles.image} /> : <View style={styles.imageContainer}>
+                            <Ionicons name="person" size={130} style={{ marginTop: 10 }} color="rgb(225 225 225)" />
+                        </View>}
+
+                        <TouchableOpacity style={styles.picIcon} onPress={pickImage} >
+                            <FontAwesome name="camera" size={20} color="rgb(255 255 255)" style={{ opacity: 0.8 }} />
+                        </TouchableOpacity>
                     </View>
                     <View style={{ gap: 10, width: '90%' }}>
                         <Input placeholder={'First Name'} value={userDetails.firstName} func={(text: any) => setUserDetails({ ...userDetails, firstName: text.target.value })} />
@@ -61,23 +92,27 @@ const styles = StyleSheet.create({
         borderRadius: "100%",
         width: 120,
         height: 120,
-        backgroundColor: 'grey'
+        backgroundColor: 'rgb(211 211 211)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden'
     },
     profileImageContainer: {
         marginHorizontal: 'auto',
         marginVertical: 40,
         position: 'relative',
-        // backgroundColor: 'red'
-        // width:50
     },
     picIcon: {
         position: 'absolute',
         bottom: 0,
         right: 0,
-        backgroundColor: 'blue',
+        backgroundColor: 'rgb(148 148 148)',
         height: 30,
         width: 30,
         borderRadius: "100%",
-        zIndex: 10
+        zIndex: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        opacity: 0.5
     }
 })
