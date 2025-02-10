@@ -21,7 +21,7 @@ const login = () => {
             <View style={styles.subContent}>
                 {loginWith === "phone" ? <LoginWithPhoneNumber /> : <LoginWithEmail />}
                 <ThemedText type='default' style={{ marginVertical: 20 }}>OR</ThemedText>
-                <Button label={'Login With Facebook'} bgcolor="#1877F2" txcolor='white' major={true} func={scrollTo} />
+                <Button label={'Login With Facebook'} bgcolor="#1877F2" txcolor='white' major={true} func={()=> router.push('/chat/home')} />
                 <Button bgcolor="black" label={'Sign In With Apple'} txcolor='white' major={true} func={scrollTo} />
                 {
                     loginWith === "phone" ? <TouchableOpacity onPress={() => setLoginWith('email')}>

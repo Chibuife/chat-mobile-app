@@ -31,9 +31,6 @@ const register = () => {
             aspect: [4, 3],
             quality: 1,
         });
-
-        console.log(result);
-
         if (!result.canceled) {
             setImage(result.assets[0].uri);
         }
@@ -47,10 +44,9 @@ const register = () => {
                 <ThemedText type='title' style={{ color: '#1877F2', paddingLeft: 20, paddingTop: 10 }}>Create new account</ThemedText>
                 <View style={styles.subContent}>
                     <View style={styles.profileImageContainer}>
-                        {image ? <Image source={{ uri: image }} style={styles.image} /> : <View style={styles.imageContainer}>
+                        {image ? <Image source={{ uri: image }} height={120} width={120} style={styles.image} /> : <View style={styles.imageContainer}>
                             <Ionicons name="person" size={130} style={{ marginTop: 10 }} color="rgb(225 225 225)" />
                         </View>}
-
                         <TouchableOpacity style={styles.picIcon} onPress={pickImage} >
                             <FontAwesome name="camera" size={20} color="rgb(255 255 255)" style={{ opacity: 0.8 }} />
                         </TouchableOpacity>
@@ -114,5 +110,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         opacity: 0.5
+    },
+    image:{
+        borderRadius:'100%',
+        width: 120,
+        height: 120,
     }
 })
