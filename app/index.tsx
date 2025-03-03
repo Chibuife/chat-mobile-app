@@ -56,30 +56,7 @@ export default function Page() {
     //     checkToken()
     // }, [viewedOnboarding, token])
 
-    return (
-        <View >
-            {
-                // viewedOnboarding && token
-                //     ?
-                //     <Redirect href={'/home'} />
-                //     :
-            //     <OnboardFlow
-            //     pages={[
-            //       {
-            //         title: 'Welcome to my app',
-            //         subtitle: 'This is page 1',
-            //         imageUri: 'https://frigade.com/img/example1.png',
-            //       },
-            //       {
-            //         title: 'Page 2 header',
-            //         subtitle: 'This is page 2',
-            //         imageUri: 'https://frigade.com/img/example2.png',
-            //       }
-            //     ]}
-            //     type={'fullscreen'}
-            //   />
+    return (          
                 <Onboarding/>
-            }
-        </View>
     );
 }

@@ -1,4 +1,4 @@
-import { FlatList, Image, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native'
+import { FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native'
 import React, { useState } from 'react'
 import { ThemedView } from '@/components/ThemedView'
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -6,11 +6,12 @@ import { ThemedText } from '@/components/ThemedText';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Input from '@/components/Input';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import { useRouter } from 'expo-router';
 const messagedata = [
     {
         id: '1',
         name: 'Frientastics',
-        group: [{ image: "" }, { image: "" },{ image: "" }, { image: "" }],
+        group: [{ image: "" }, { image: "" }, { image: "" }, { image: "" }],
         message: 'I love this great app',
         date: '17:17'
     },
@@ -118,20 +119,23 @@ const home = () => {
     const truncateText = (text?: string, maxLength?: number) => {
         if (text && maxLength) return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
     };
+    const router = useRouter()
     return (
         <ScrollView>
             <ThemedView style={{ flex: 1, minHeight: height, }}>
-                <ThemedView style={{ padding: 10, alignItems: 'center', flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: 'rgb(225 225 225)', justifyContent: 'space-between' }}>
+                <ThemedView style={{paddingVertical:40,padding: 10, alignItems: 'center', flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: 'rgb(225 225 225)', justifyContent: 'space-between' }}>
                     <Ionicons name="menu-outline" size={30} style={{}} color="" />
                     <ThemedText type='subtitle' style={{}}>My Profile</ThemedText>
-                    <MaterialCommunityIcons name="notebook-edit-outline" size={20} style={{}} color="" />
+                    <TouchableOpacity onPress={()=> router.push('/chat/findPeople')}>
+                        <MaterialCommunityIcons name="notebook-edit-outline" size={20} style={{}} color="" />
+                    </TouchableOpacity>
                 </ThemedView>
                 <View style={{ paddingHorizontal: 10 }}>
                     <Input placeholder={'First Name'} style={{ paddingVertical: 5, borderRadius: 5, marginVertical: 10, backgroundColor: 'rgb(242, 242, 242)', borderWidth: 0 }} leftIcon={<AntDesign name="search1" size={10} style={{}} color="" />} value={friend} func={(text: any) => setFriend(text.target.value)} />
                     <FlatList
                         renderItem={({ item }) => {
                             return (
-                                <View style={styles.profile}>
+                                <TouchableOpacity onPress={() => router.push('/chat/abc')} style={styles.profile}>
                                     <View style={styles.imageCon}>
                                         {
                                             item.image ?
@@ -143,7 +147,7 @@ const home = () => {
                                         <View style={styles.active} />
                                     </View>
                                     <ThemedText>{item.name}</ThemedText>
-                                </View>
+                                </TouchableOpacity>
                             )
                         }}
                         data={data}
@@ -176,8 +180,8 @@ const home = () => {
                                                                         : item.group.length >= 3 ? <>
                                                                             {
                                                                                 member.image && index < 3 ?
-                                                                                    <Image source={require('@/assets/images/react-logo.png')} style={[styles.image, { position: 'absolute', right: index === 0 ? -11 : index === 1 ? -11: 8, width: 30, height: 30, top: index === 0 ? -11 : 8 }]} />
-                                                                                    : <View style={[styles.dummy, { position: 'absolute', right: index === 0 ? -11 : index === 1 ? -11: 8, width: 30, height: 30, top: index === 0 ? -11 : 8 }]}>
+                                                                                    <Image source={require('@/assets/images/react-logo.png')} style={[styles.image, { position: 'absolute', right: index === 0 ? -11 : index === 1 ? -11 : 8, width: 30, height: 30, top: index === 0 ? -11 : 8 }]} />
+                                                                                    : <View style={[styles.dummy, { position: 'absolute', right: index === 0 ? -11 : index === 1 ? -11 : 8, width: 30, height: 30, top: index === 0 ? -11 : 8 }]}>
                                                                                         <Ionicons name="person" size={30} style={{ marginTop: 10 }} color="rgb(225 225 225)" />
                                                                                     </View>
                                                                             }
@@ -245,7 +249,7 @@ const styles = StyleSheet.create({
     image: {
         width: 50,
         height: 50,
-        borderRadius: '100%'
+        borderRadius: 100
     },
     dummy: {
         width: 50,

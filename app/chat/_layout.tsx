@@ -16,9 +16,9 @@ export default function ChatLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="home" options={{ headerShown: false }} />
-        {/* <Stack.Screen name="edith" options={{ headerShown: false }} />
-        <Stack.Screen name="setting" options={{ headerShown: false }} /> */}
-        {/* <Stack.Screen name="reset-password" options={{ headerShown: false }} /> */}
+        <Stack.Screen name="findPeople" options={{ headerShown: false }} />
+        {/* <Stack.Screen name="setting" options={{ headerShown: false }} /> */}
+        <Stack.Screen name="[id]" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

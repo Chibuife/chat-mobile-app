@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { View, Text, FlatList, Animated, StyleSheet, useWindowDimensions } from 'react-native'
+import { View, Text, FlatList, Animated, StyleSheet, useWindowDimensions, SafeAreaView } from 'react-native'
 import OnboardingItem from './OnboardingItem'
 import Paginator from './Paginator'
 import Button from '../Button'
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router'
-import { ScrollView } from 'react-native-gesture-handler'
 import { Dimensions } from "react-native";
 
 const OnboardingScreenData = [
@@ -83,14 +82,14 @@ const Onboarding = () => {
 
 
 
-  const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
+  const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 10 }).current;
 
   return (
-    <ScrollView>
+    <SafeAreaView style={{flex:1, overflow:'hidden'}}>
       <FlatList
         data={OnboardingScreenData}
         renderItem={({ item }) => <OnboardingItem item={item} />}
-        showsHorizontalScrollIndicator
+        showsHorizontalScrollIndicator={false}
         horizontal
         pagingEnabled
         bounces={false}
@@ -112,20 +111,21 @@ const Onboarding = () => {
       }]}>
         {
           <>
-            {currentIndex < OnboardingScreenData.length - 1 ? <Button major={false} bgcolor='' marginHorizontal={true} txcolor='white' label={'Skip all'} func={scrollToLast} /> : <Text style={{ width: '20%' }}></Text>}
+            {currentIndex < OnboardingScreenData.length - 1 ? <Button major={false} bgcolor='red' marginHorizontal={true} txcolor='white' label={'Skip all'} func={scrollToLast} /> : <Text style={{ width: '20%' }}></Text>}
             <Paginator data={OnboardingScreenData} scrollX={scrollX} />
             {currentIndex >= OnboardingScreenData.length - 1 ? <Button bgcolor='' marginHorizontal={true} label={'Get Started '} major={false} func={viewedOnboarding} /> :
               <Button bgcolor='' marginHorizontal={true} label={'Next '} txcolor='white' major={false} func={scrollTo} />}
           </>
         }
       </View>
-    </ScrollView>
+    </SafeAreaView>
   )
 }
 const style = StyleSheet.create({
   staticItems: {
     position: "absolute",
-    bottom: '15%',
+    bottom: '0%',
+    // backgroundColor:'red',
     left: 0,
     right: 0,
     height: 200,

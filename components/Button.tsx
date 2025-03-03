@@ -18,7 +18,9 @@ export default function Button({ label, marginHorizontal, borderColorLight, bord
                 </Pressable>
             </View> :
             <View style={[{
-                marginHorizontal: marginHorizontal ? marginHorizontal : "auto", borderColor, borderWidth
+                // marginHorizontal: marginHorizontal ? marginHorizontal : "auto", 
+                width:'40%',
+                                borderColor, borderWidth
             }, styles.buttonContainer]}>
                 <Pressable style={styles.button} onPress={() => func()}>
                     <Text style={styles.buttonLabel}>{label}</Text>
@@ -32,6 +34,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         padding: 3,
+        // backgroundColor:'red'
     },
     button: {
         width: '100%',

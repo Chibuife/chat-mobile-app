@@ -12,7 +12,7 @@ const LoginWithEmail = () => {
     return (
         <View style={styles.container}>
             <Input placeholder={'E-mail'} value={email} func={(text: any) => setEmail(text.target.value)} />
-            <View>
+            <View style={{width:'100%'}}>
             <Input placeholder={'Password'} value={password} func={(text: any) => setPassword(text.target.value)} />
             <TouchableOpacity onPress={() => router.push('/auth/reset-password')}>
                 <ThemedText type='defaultSemiBold' style={{ color: '#1877F2', textAlign:"right" }}>Forgotten password?</ThemedText>

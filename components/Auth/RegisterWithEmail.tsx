@@ -23,6 +23,7 @@ export default RegisterWithEmail
 const styles = StyleSheet.create({
     container: {
         gap: 30,
-        width: '90%'
+        width: '100%',
+        alignItems:'center'
     }
 })

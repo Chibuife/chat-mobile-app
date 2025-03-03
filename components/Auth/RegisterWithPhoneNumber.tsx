@@ -44,7 +44,8 @@ export default RegisterWithPhoneNumber
 const styles = StyleSheet.create({
     container: {
         gap: 50,
-        width: '90%'
+        width: '100%',
+        alignItems:'center'
     },
     image:{
         width:20,

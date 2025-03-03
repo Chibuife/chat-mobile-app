@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import { ThemedView } from '@/components/ThemedView'
 import Button from '@/components/Button'
@@ -13,7 +13,7 @@ const login = () => {
     const router = useRouter()
 
     return (
-        <ThemedView style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 20 }}>
                 <Icon name="arrowleft" size={20} color="#1877F2" />
             </TouchableOpacity>
@@ -22,7 +22,7 @@ const login = () => {
                 {loginWith === "phone" ? <LoginWithPhoneNumber /> : <LoginWithEmail />}
                 <ThemedText type='default' style={{ marginVertical: 20 }}>OR</ThemedText>
                 <Button label={'Login With Facebook'} bgcolor="#1877F2" txcolor='white' major={true} func={()=> router.push('/chat/home')} />
-                <Button bgcolor="black" label={'Sign In With Apple'} txcolor='white' major={true} func={scrollTo} />
+                <Button bgcolor="black" label={'Sign In With Apple'} txcolor='white' major={true} func={()=>console.log('hi')} />
                 {
                     loginWith === "phone" ? <TouchableOpacity onPress={() => setLoginWith('email')}>
                         <ThemedText type='defaultSemiBold' style={{ color: '#1877F2' }}>Sign in with E-mail</ThemedText>
@@ -31,7 +31,7 @@ const login = () => {
                     </TouchableOpacity>
                 }
             </View>
-        </ThemedView>
+        </SafeAreaView>
     )
 }
 
