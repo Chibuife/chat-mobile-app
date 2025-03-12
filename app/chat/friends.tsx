@@ -14,7 +14,7 @@ const friends = () => {
     const [friends, setFriends] = useState()
     const { getFriends, acceptFriend, unfriend } = useContext(ChatContext)
     const router = useRouter()
-    // console.log(friends)
+    console.log(friends)
     useEffect(() => {
         getFriends(name, setFriends)
     }, [name])
@@ -50,11 +50,21 @@ const friends = () => {
                                     </View>
                                     {
                                         item.type === 'friend' ?
-                                            <TouchableOpacity onPress={()=> unfriend(item.id)} style={{ backgroundColor: 'rgb(242, 242, 242)', paddingHorizontal: 15, paddingVertical: 2, borderRadius: 20 }}>
+                                            <TouchableOpacity onPress={()=> {
+                                                unfriend(item.id)
+                                                setTimeout(() => {
+                                                    getFriends(name, setFriends)
+                                                }, 3000);
+                                            }} style={{ backgroundColor: 'rgb(242, 242, 242)', paddingHorizontal: 15, paddingVertical: 2, borderRadius: 20 }}>
                                                 <Text>Unfriend</Text>
                                             </TouchableOpacity>
                                             :
-                                            <TouchableOpacity onPress={()=>acceptFriend(item.id,item.firstName,item.lastName) } style={{ backgroundColor: 'rgb(242, 242, 242)', paddingHorizontal: 15, paddingVertical: 2, borderRadius: 20 }}>
+                                            <TouchableOpacity onPress={()=>{
+                                                acceptFriend(item.id,)
+                                                setTimeout(() => {
+                                                    getFriends(name, setFriends)
+                                                }, 3000);
+                                                } } style={{ backgroundColor: 'rgb(242, 242, 242)', paddingHorizontal: 15, paddingVertical: 2, borderRadius: 20 }}>
                                                 <Text>Accept</Text>
                                             </TouchableOpacity>
                                     }

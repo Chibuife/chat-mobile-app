@@ -15,14 +15,14 @@ const findPeople = () => {
     const [name, setName] = useState('')
     const { height } = useWindowDimensions()
     const [added, setAdded] = useState()
-    const[ids,setIds] = useState()
+    const[ids,setIds] = useState([])
     const router = useRouter()
     useEffect(() => {
         getAllUsers(setFriend, name)
     }, [name])
 
     useEffect(()=>{
-        setIds([...ids, added.id])
+        added ? setIds([...ids, added.id]) :null
     },[added])
     return (
         <ScrollView>
@@ -56,7 +56,7 @@ const findPeople = () => {
                                         sendRequest(item.id,setAdded)
                                     }} style={{ backgroundColor: 'rgb(242, 242, 242)', paddingHorizontal: 15, paddingVertical: 2, borderRadius: 20 }}>
                                        {
-                                        ids.includes(item.id)
+                                        ids.includes(item?.id)
                                         ?<Text>Added</Text>
                                         :<Text>Add</Text>
                                        }

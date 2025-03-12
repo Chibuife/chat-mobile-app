@@ -1,8 +1,8 @@
 import { createContext, useState, useEffect } from "react";
 import { apiRequest } from '../helperFn/apiRequest'
 import login from "@/app/auth/login";
-import { useRouter } from "expo-router";
-import {jwtDecode} from "jwt-decode";
+import { useRouter, usePathname } from "expo-router";
+import { jwtDecode } from "jwt-decode";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ChatContext = createContext({
@@ -11,53 +11,44 @@ const ChatContext = createContext({
     messages: [],
     registerUser: (userDetails, email, password) => { },
     loginUser: (email, password) => { },
-    getAllUsers:(setUsers:Function, name:String)=>{},
-    sendRequest:(id:string, setAdded:Function)=>{},
-    getFriends:(name:string, setUsers:Function)=>{},
-    acceptFriend:(id:string)=>{},
-    unfriend:(id:string)=>{}
+    getAllUsers: (setUsers: Function, name: String) => { },
+    sendRequest: (id: string, setAdded: Function) => { },
+    getFriends: (name: string, setUsers: Function) => { },
+    acceptFriend: (id: string) => { },
+    unfriend: (id: string) => { }
 });
 
 interface UserObj {
-    token:String|undefined
+    token: String | undefined
 }
 
 export const ChatProvider = ({ children }) => {
-    const [user, setUser] = useState<any>(); 
-    const [friends, setFriends] = useState([]); 
-    const [messages, setMessages] = useState([]); 
-    const [ws, setWs] = useState(null); 
-    // console.log(user, 'user')
+    const [user, setUser] = useState<any>();
+    const [friends, setFriends] = useState([]);
+    const [messages, setMessages] = useState([]);
+    const [ws, setWs] = useState(null);
     const router = useRouter()
-    useEffect( () => {
-        if (user) {
-            try {
-                const decoded = jwtDecode(user?.token);
-                setUser({...user, ...decoded});
-                AsyncStorage.setItem("user", JSON.stringify(user));
-            } catch (error) {
-                console.error("Invalid token:", error);
-            }
+    const pathname = usePathname();
+
+
+   
+    const loadUser = async () => {
+        const storedUser = await AsyncStorage.getItem("user");
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
         }
-    }, []);
+    };
     useEffect(() => {
-        const loadUser = async () => {
-            const storedUser = await AsyncStorage.getItem("user");
-            if (storedUser && !user) {
-                setUser(JSON.parse(storedUser)); 
-            }
-        };
-        loadUser();
-    }, []);
+            loadUser();
+    }, [pathname]);
 
     const isTokenExpired = () => {
-         // If no token, consider it expired
-    
+
         try {
             const decoded = jwtDecode(user?.token);
-            const currentTime = Date.now() / 1000; // Convert to seconds
-    
-            return decoded.exp < currentTime; // Returns true if token is expired
+            const currentTime = Date.now() / 1000; 
+
+            return decoded.exp < currentTime; 
         } catch (error) {
             console.error("Invalid token:", error);
             return true; // Treat invalid tokens as expired
@@ -89,34 +80,35 @@ export const ChatProvider = ({ children }) => {
 
     const registerUser = async (userDetails, email, password) => {
         console.log('hi', userDetails?.lastName, userDetails?.firstName, email, password)
-
-        await apiRequest('http://localhost:8080/api/v1/auth/signup', { lastName: userDetails.lastName, firstName: userDetails.firstName, email, password }, "POST", setUser, router)
+        AsyncStorage.removeItem("user")
+        setUser()
+        await apiRequest('http://localhost:8080/api/v1/auth/signup', { lastName: userDetails.lastName, firstName: userDetails.firstName, email, password }, "POST", undefined, router)
     };
 
     const loginUser = async (email, password) => {
         console.log('hi', email, password)
-        
-       const response = await apiRequest('http://localhost:8080/api/v1/auth/login', { email, password }, "POST", setUser,router )
-      
+        AsyncStorage.removeItem("user")
+        setUser()
+        const response = await apiRequest('http://localhost:8080/api/v1/auth/login', { email, password }, "POST", setUser, router)
     };
 
-    const getAllUsers =async(setUsers:Function, name:String)=>{
-        await apiRequest('http://localhost:8080/api/v1/getallusers', { username: name, id: user._id }, "POST", setUsers)
+    const getAllUsers = async (setUsers: Function, name: String) => {
+        console.log(user, 'uuazs')
+        user && await apiRequest('http://localhost:8080/api/v1/getallusers', { username: name, id: user._id }, "POST", setUsers)
     }
-    const sendRequest = async(id:string, setAdded:Function)=>{
-        await apiRequest('http://localhost:8080/api/v1/friendRequest', { firstName:user.firstName, userId: user._id, lastName:user.lastName, id  }, "POST", setAdded)
+    const sendRequest = async (id: string, setAdded: Function) => {
+        user && await apiRequest('http://localhost:8080/api/v1/friendRequest', { userId: user._id, id }, "POST", setAdded)
     }
-    const getFriends = async (name:string, setUsers:Function)=>{
-        console.log(user)
-        await apiRequest('http://localhost:8080/api/v1/getallfriends', { username: name, id: user._id }, "POST", setUsers)
-    }
-
-    const acceptFriend = async(id:string)=>{
-        await apiRequest('http://localhost:8080/api/v1/addfriend', {   firstName:user.firstName, userId: user._id, lastName:user.lastName, id }, "POST")
+    const getFriends = async (name: string, setUsers: Function) => {
+        user && await apiRequest('http://localhost:8080/api/v1/getallfriends', { username: name, id: user._id }, "POST", setUsers)
     }
 
-    const unfriend = async(id:string)=>{
-        await apiRequest('http://localhost:8080/api/v1/removeFriend', { userid: user._id,  id  }, "POST")
+    const acceptFriend = async (id: string) => {
+        user && await apiRequest('http://localhost:8080/api/v1/addfriend', { userId: user._id, id }, "POST",)
+    }
+
+    const unfriend = async (id: string) => {
+        user && await apiRequest('http://localhost:8080/api/v1/removeFriend', { userId: user._id, id }, "POST")
     }
     // const sendMessage = (toUserId, text) => {
     //     if (ws) {
@@ -130,7 +122,7 @@ export const ChatProvider = ({ children }) => {
     // };
 
     return (
-        <ChatContext.Provider value={{ user, friends, messages, registerUser, loginUser, getAllUsers, sendRequest, getFriends, acceptFriend,unfriend }}>
+        <ChatContext.Provider value={{ user, friends, messages, registerUser, loginUser, getAllUsers, sendRequest, getFriends, acceptFriend, unfriend }}>
             {children}
         </ChatContext.Provider>
     );
