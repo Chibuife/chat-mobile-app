@@ -1,5 +1,5 @@
 import { FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { ThemedView } from '@/components/ThemedView'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { ThemedText } from '@/components/ThemedText';
@@ -7,132 +7,36 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Input from '@/components/Input';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { useRouter } from 'expo-router';
-const messagedata = [
-    {
-        id: '1',
-        name: 'Frientastics',
-        group: [{ image: "" }, { image: "" }, { image: "" }, { image: "" }],
-        message: 'I love this great app',
-        date: '17:17'
-    },
-    {
-        id: '1',
-        name: 'Darren Black',
-        message: 'I know right?',
-        date: '17:09'
-    }, {
-        id: '1',
-        name: 'Lesa Richardson',
-        message: "I'm so glad we found this app",
-        date: '16:57'
-    }, {
-        id: '1',
-        name: 'Mark Twain',
-        message: "Hey Cristina!",
-        date: '16:49'
-    }, {
-        id: '1',
-        name: '3 Coma Club',
-        group: [{ image: "" }, { image: "" }],
-        message: "I will neva drink again",
-        date: '16:49'
-    }, {
-        id: '1',
-        name: 'Carmila Bradly',
-        message: "We had some much fun last night",
-        date: '16:41'
-    }, {
-        id: '1',
-        name: 'Curtis George',
-        message: "Let me create a group",
-        date: '16:32'
-    }, {
-        id: '1',
-        name: 'Florain Marcu',
-        message: "This app is amazing",
-        date: '16:30'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    },
-]
-const data = [
-    {
-        id: '1',
-        name: 'daren',
-        // image: '@/assets/images/sakuna.jfif'
-    },
-    {
-        id: '1',
-        name: 'daren',
-        // image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        // image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    },
-]
+import ChatContext from '@/helperFn/RegisterContextApi';
+
 const findPeople = () => {
-    const [friend, setFriend] = useState('')
+    const { getAllUsers, sendRequest } = useContext(ChatContext)
+    const [friend, setFriend] = useState([])
+    const [name, setName] = useState('')
     const { height } = useWindowDimensions()
-    const truncateText = (text?: string, maxLength?: number) => {
-        if (text && maxLength) return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
-    };
+    const [added, setAdded] = useState()
+    const[ids,setIds] = useState()
     const router = useRouter()
+    useEffect(() => {
+        getAllUsers(setFriend, name)
+    }, [name])
+
+    useEffect(()=>{
+        setIds([...ids, added.id])
+    },[added])
     return (
         <ScrollView>
             <ThemedView style={{ flex: 1, minHeight: height, }}>
-                <ThemedView style={{paddingVertical:40, padding: 10, alignItems: 'center', flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: 'rgb(225 225 225)', justifyContent: 'space-between' }}>
-                    <Input placeholder={'Search for friends'} style={{ paddingVertical: 5,  width:'80%',borderRadius: 5, marginVertical: 10, backgroundColor: 'rgb(242, 242, 242)', borderWidth: 0 }} leftIcon={<AntDesign name="search1" size={10} style={{}} color="" />} value={friend} func={(text: any) => setFriend(text.target.value)} />
-                    <Text style={{color:'#1877F2'}}>Cancel</Text>
+                <ThemedView style={{ paddingTop: 40, padding: 10, alignItems: 'center', flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: 'rgb(225 225 225)', justifyContent: 'space-between' }}>
+                    <Input placeholder={'Search for friends'} style={{ paddingVertical: 5, width: '80%', borderRadius: 5, marginVertical: 10, backgroundColor: 'rgb(242, 242, 242)', borderWidth: 0 }} leftIcon={<AntDesign name="search1" size={10} style={{}} color="" />} value={name} func={(text: any) => setName(text.target.value)} />
+                    <Text style={{ color: '#1877F2' }}>Cancel</Text>
                 </ThemedView>
                 <View style={{ paddingHorizontal: 10 }}>
                     <FlatList
                         renderItem={({ item }) => {
                             return (
                                 <View style={styles.message}>
-                                    <View style={{ flexDirection: 'row', gap:5, alignItems:'center' }}>
+                                    <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                                         {
                                             <View style={styles.imageCon}>
                                                 {
@@ -145,16 +49,23 @@ const findPeople = () => {
                                             </View>
                                         }
                                         <View>
-                                            <ThemedText type='defaultSemiBold'>{item.name}</ThemedText>
+                                            <ThemedText type='defaultSemiBold'>{item.firstName} {item.lastName}</ThemedText>
                                         </View>
                                     </View>
-                                    <TouchableOpacity style={{backgroundColor: 'rgb(242, 242, 242)',paddingHorizontal:15, paddingVertical:2, borderRadius:20}}>
-                                     <Text>Unfriend</Text>   
+                                    <TouchableOpacity onPress={() => {
+                                        sendRequest(item.id,setAdded)
+                                    }} style={{ backgroundColor: 'rgb(242, 242, 242)', paddingHorizontal: 15, paddingVertical: 2, borderRadius: 20 }}>
+                                       {
+                                        ids.includes(item.id)
+                                        ?<Text>Added</Text>
+                                        :<Text>Add</Text>
+                                       }
+                                        
                                     </TouchableOpacity>
                                 </View>
                             )
                         }}
-                        data={messagedata}
+                        data={friend}
                         contentContainerStyle={{ gap: 20, marginVertical: 20 }}
                         showsHorizontalScrollIndicator={false}
                     />
@@ -201,7 +112,7 @@ const styles = StyleSheet.create({
     message: {
         flexDirection: 'row',
         gap: 20,
-        justifyContent:'space-between',
-        alignItems:'center'
+        justifyContent: 'space-between',
+        alignItems: 'center'
     }
 })

@@ -1,5 +1,5 @@
 import { Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { ThemedView } from '@/components/ThemedView'
 import Button from '@/components/Button'
 import LoginWithPhoneNumber from '@/components/Auth/LoginWithPhoneNumber'
@@ -13,8 +13,10 @@ import { useRouter } from 'expo-router'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import * as ImagePicker from 'expo-image-picker';
+import ChatContext from '@/helperFn/RegisterContextApi'
 
 const register = () => {
+    const {  registerUser,  } = useContext(ChatContext);
     const [registerWith, setRegisterWith] = useState('phone')
     const [userDetails, setUserDetails] = useState({
         firstName: '',
@@ -35,6 +37,7 @@ const register = () => {
             setImage(result.assets[0].uri);
         }
     };
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
             <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 20 }}>
@@ -58,7 +61,7 @@ const register = () => {
                         <Input placeholder={'First Name'} value={userDetails.firstName} func={(text: any) => setUserDetails({ ...userDetails, firstName: text.target.value })} />
                         <Input placeholder={'Last Name'} value={userDetails.lastName} func={(text: any) => setUserDetails({ ...userDetails, lastName: text.target.value })} />
                     </View>
-                    {registerWith === "phone" ? <RegisterWithPhoneNumber /> : <RegisterWithEmail />}
+                    {registerWith === "phone" ? <RegisterWithPhoneNumber /> : <RegisterWithEmail userDetails={userDetails} registerUser={registerUser} />}
                     <ThemedText type='default' style={{ marginVertical: 10 }}>OR</ThemedText>
                     {/* <Button label={'Login With Facebook'} bgcolor="#1877F2" txcolor='white' major={true} func={scrollTo} />
                 <Button bgcolor="black" label={'Sign In With Apple'} txcolor='white' major={true} func={scrollTo} /> */}

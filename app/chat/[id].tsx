@@ -10,6 +10,8 @@ import { Audio } from 'expo-av';
 import Slider from "@react-native-community/slider";
 import * as ImagePicker from "expo-image-picker";
 import { Image } from 'react-native'
+import { sendMessage } from '@/helperFn'
+const ws = new WebSocket('ws://localhost:8080');
 
 
 interface Message { mess: any; time: string; type: string; }
@@ -20,17 +22,28 @@ const message = () => {
     const router = useRouter()
     const { height } = useWindowDimensions()
     const ref = useRef(null)
-    const [messages, setMessages] = useState<Message[]| undefined>()
+    const [messages, setMessages] = useState<Message[] | undefined>()
     const currentTime = new Date().toLocaleTimeString();
     const [recording, setRecording] = useState<any>(null);
-    // const [recordingUri, setRecordingUri] = useState(null);
     const [isPlaying, setIsPlaying] = useState<number>(-1);
     const [progress, setProgress] = useState<Progress>();
     const [duration, setDuration] = useState<any>(1);
     const [currentIndex, setCurrentIndex] = useState<number>();
     const sound = useRef(new Audio.Sound());
-
     const progressInterval = useRef<any>(null);
+
+    // Listen for messages
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'history') {
+            console.log('Chat history:', data.messages);
+            setMessages(data.messages)
+        } else {
+            console.log(`Message from ${data.from}: ${data.message}`);
+            setMessages([...messages,data.messages])
+
+        }
+    };
 
     const openCamera = async () => {
         // Request camera permissions
@@ -59,12 +72,12 @@ const message = () => {
     };
 
     // Load the audio
-    const loadAudio = async (uri:string, index:number) => {
+    const loadAudio = async (uri: string, index: number) => {
         try {
             console.log("Loading audio...");
             await sound.current.unloadAsync(); // Ensure previous sound is unloaded
             await sound.current.loadAsync({ uri }, {}, true);
-            const status:any = await sound.current.getStatusAsync();
+            const status: any = await sound.current.getStatusAsync();
             setDuration(status.durationMillis || 1);
             setProgress({
                 index: index, position: 0
@@ -76,8 +89,8 @@ const message = () => {
         }
     };
 
-    const setAudioStatusListener = (index:number) => {
-        sound.current.setOnPlaybackStatusUpdate((status:any) => {
+    const setAudioStatusListener = (index: number) => {
+        sound.current.setOnPlaybackStatusUpdate((status: any) => {
             if (status.didJustFinish) {
                 setIsPlaying(-1);
                 setProgress({ index, position: 0 });
@@ -87,13 +100,13 @@ const message = () => {
         });
     };
     // Play or Pause the audio
-    const togglePlayPause = async (index:number, uri:string) => {
+    const togglePlayPause = async (index: number, uri: string) => {
 
         if (currentIndex !== index) {
 
             await loadAudio(uri, index);
         }
-        const status:any = await sound.current.getStatusAsync();
+        const status: any = await sound.current.getStatusAsync();
         console.log(status.positionMillis >= status.durationMillis, "did")
         if (status.didJustFinish || status.positionMillis >= status.durationMillis) {
             // Restart playback if it has finished
@@ -111,16 +124,16 @@ const message = () => {
     };
 
     // Update progress while playing
-    const updateProgress = (index:number) => {
+    const updateProgress = (index: number) => {
         clearInterval(progressInterval.current); // Clear previous interval
         progressInterval.current = setInterval(async () => {
-            const status:any = await sound.current.getStatusAsync();
+            const status: any = await sound.current.getStatusAsync();
             setProgress({ index: index, position: status.positionMillis });
         }, 50);
     };
 
     // Seek to a new position
-    const seekAudio = async (value:any) => {
+    const seekAudio = async (value: any) => {
         await sound.current.setPositionAsync(value);
         setProgress(value);
     };
@@ -134,7 +147,7 @@ const message = () => {
             }
 
             console.log("Starting recording...");
-            const recording:any = new Audio.Recording();
+            const recording: any = new Audio.Recording();
             await recording.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
             await recording.startAsync();
             setRecording(recording);
@@ -199,7 +212,7 @@ const message = () => {
                 } */}
                 <FlatList
                     data={messages}
-                    renderItem={({ item, index }:{item:any, index:number}) => {
+                    renderItem={({ item, index }: { item: any, index: number }) => {
                         return (
                             <SentMessage item={item} isPlaying={isPlaying} togglePlayPause={togglePlayPause} seekAudio={seekAudio} progress={progress} index={index} duration={duration} />
                         )
@@ -221,18 +234,17 @@ const message = () => {
                         <TextInput ref={ref} style={{ flex: 1, outline: 'none' }} />
                     </View>
                     <TouchableOpacity onPress={() => {
-                        setMessages([
-                            ...(messages ?? []), {
-                                mess: ref.current.value,
-                                time: currentTime,
-                                type: 'text'
-                            }
-                        ])
-                            ref.current.value = ""
-                        
-                        console.log(messages)
+                        // setMessages([
+                        //     ...(messages ?? []), {
+                        //         mess: ref.current.value,
+                        //         time: currentTime,
+                        //         type: 'text'
+                        //     }
+                        // ])
+                        sendMessage(toUserId,ref.current.value,fromUserId)
+                        ref.current.value = ""
                     }}>
-                        <Ionicons name='send' size={20} color={ref.current.value !== "" ? "#1877F2":"#7eaae4"} />
+                        <Ionicons name='send' size={20} color={ref.current.value !== "" ? "#1877F2" : "#7eaae4"} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -240,25 +252,35 @@ const message = () => {
     )
 }
 
-const SentMessage = ({ item, togglePlayPause, seekAudio, progress, index, duration, isPlaying }:{item:any,togglePlayPause:Function,seekAudio:any, progress:any,index:Number, duration:any, isPlaying:Number   }) => {
+const SentMessage = ({ item, togglePlayPause, seekAudio, progress, index, duration, isPlaying }: { item: any, togglePlayPause: Function, seekAudio: any, progress: any, index: Number, duration: any, isPlaying: Number }) => {
     return (
-        <View style={styles.senderMessage}>
-            {item.type === 'image' && <Image source={{ uri: item.mess }} style={{ width: 200, height: 200, marginTop: 20 }} />}
-            {item.type === 'audio' && <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-                <Pressable onPress={() => togglePlayPause(index, item.mess)}  style={{ borderRadius: '100%', borderWidth: 1, borderColor: '#1877F2', width: 10, height: 10 }}>
-                    {
-                        isPlaying === index ? <AntDesign name='caretright' size={20} color="#1877F2" /> :
-                            <AntDesign name='pause' size={20} color="#1877F2" />}
-                </Pressable>
-                <Slider
-                    value={index === progress.index ? progress.position : 0}
-                    maximumValue={duration}
-                    onSlidingComplete={seekAudio}
-                    minimumTrackTintColor="blue"
-                    maximumTrackTintColor="gray"
-                    thumbTintColor="red"
-                /></View>}
-            {item.type === 'text' && <Text>{item.mess}</Text>}
+        <View style={{ width: '100%', alignItems: 'flex-end', flexDirection: item.sender === 'chibuife' ? 'row-reverse' : 'row', gap: 2 }}>
+            {
+                item.image ?
+                    <Image source={require('@/assets/images/react-logo.png')} style={styles.image} />
+                    : <View style={styles.dummy}>
+                        <Ionicons name="person" size={30} style={{ marginTop: 10 }} color="rgb(225 225 225)" />
+                    </View>
+            }
+            <View style={[styles.message, { borderBottomLeftRadius: item.sender !== 'chibuife' ? 20 : 0, borderBottomRightRadius: item.sender === 'chibuife' ? 20 : 0, justifyContent: item.sender === 'chibuife' ? 'flex-end' : 'flex-start', backgroundColor: item.sender === 'chibuife' ? '#1877F2' : '#b2b2b2' }]}>
+                {item.type === 'image' && <Image source={{ uri: item.mess }} style={{ width: 200, height: 200, marginTop: 20 }} />}
+                {item.type === 'audio' && <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                    <Pressable onPress={() => togglePlayPause(index, item.mess)} style={{ borderRadius: '100%', borderWidth: 1, borderColor: '#1877F2', width: 10, height: 10 }}>
+                        {
+                            isPlaying === index ? <AntDesign name='caretright' size={20} color="#1877F2" /> :
+                                <AntDesign name='pause' size={20} color="#1877F2" />}
+                    </Pressable>
+                    <Slider
+                        value={index === progress.index ? progress.position : 0}
+                        maximumValue={duration}
+                        onSlidingComplete={seekAudio}
+                        minimumTrackTintColor="blue"
+                        maximumTrackTintColor="gray"
+                        thumbTintColor="red"
+                    /></View>}
+                {item.type === 'text' && <Text style={{ color: item.sender === 'chibuife' ? 'white' : 'black', padding: 20 }}>{item.mess}</Text>}
+                <Text style={{ textAlign: item.sender === 'chibuife' ? 'left' : 'right' }}>{item.time}</Text>
+            </View>
         </View>
     )
 }
@@ -287,11 +309,25 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-around'
     },
-    senderMessage: {
-        clip: 'polygon(0% 0%, 93% 0, 92% 81%, 100% 97%, 93% 92%, 93% 100%, 0 100%)',
+    message: {
         backgroundColor: 'red',
         marginVertical: 5,
-        width: '50%',
-
-    }
+        borderTopRightRadius: 20,
+        borderTopLeftRadius: 20,
+        maxWidth: '70%'
+    },
+    dummy: {
+        width: 20,
+        height: 20,
+        borderRadius: '100%',
+        backgroundColor: 'rgb(211 211 211)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden'
+    },
+    image: {
+        width: 20,
+        height: 20,
+        borderRadius: 100
+    },
 })

@@ -1,5 +1,5 @@
 import { FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { ThemedView } from '@/components/ThemedView'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { ThemedText } from '@/components/ThemedText';
@@ -7,117 +7,17 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Input from '@/components/Input';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { useRouter } from 'expo-router';
-const messagedata = [
-    {
-        id: '1',
-        name: 'Frientastics',
-        group: [{ image: "" }, { image: "" }, { image: "" }, { image: "" }],
-        message: 'I love this great app',
-        date: '17:17'
-    },
-    {
-        id: '1',
-        name: 'Darren Black',
-        message: 'I know right?',
-        date: '17:09'
-    }, {
-        id: '1',
-        name: 'Lesa Richardson',
-        message: "I'm so glad we found this app",
-        date: '16:57'
-    }, {
-        id: '1',
-        name: 'Mark Twain',
-        message: "Hey Cristina!",
-        date: '16:49'
-    }, {
-        id: '1',
-        name: '3 Coma Club',
-        group: [{ image: "" }, { image: "" }],
-        message: "I will neva drink again",
-        date: '16:49'
-    }, {
-        id: '1',
-        name: 'Carmila Bradly',
-        message: "We had some much fun last night",
-        date: '16:41'
-    }, {
-        id: '1',
-        name: 'Curtis George',
-        message: "Let me create a group",
-        date: '16:32'
-    }, {
-        id: '1',
-        name: 'Florain Marcu',
-        message: "This app is amazing",
-        date: '16:30'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    },
-]
-const data = [
-    {
-        id: '1',
-        name: 'daren',
-        // image: '@/assets/images/sakuna.jfif'
-    },
-    {
-        id: '1',
-        name: 'daren',
-        // image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        // image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    }, {
-        id: '1',
-        name: 'daren',
-        image: '@/assets/images/sakuna.jfif'
-    },
-]
+import ChatContext from '@/helperFn/RegisterContextApi';
 const friends = () => {
-    const [friend, setFriend] = useState('')
+    const [name, setName] = useState('')
     const { height } = useWindowDimensions()
-
+    const [friends, setFriends] = useState()
+    const { getFriends, acceptFriend, unfriend } = useContext(ChatContext)
     const router = useRouter()
+    // console.log(friends)
+    useEffect(() => {
+        getFriends(name, setFriends)
+    }, [name])
     return (
         <ScrollView>
             <ThemedView style={{ flex: 1, minHeight: height, }}>
@@ -127,7 +27,7 @@ const friends = () => {
                     <View></View>
                 </ThemedView>
                 <View style={{ paddingHorizontal: 10 }}>
-                    <Input placeholder={'Search for friends'} style={{ paddingVertical: 5, borderRadius: 5, marginVertical: 10, backgroundColor: 'rgb(242, 242, 242)', borderWidth: 0 }} leftIcon={<AntDesign name="search1" size={10} style={{}} color="" />} value={friend} func={(text: any) => setFriend(text.target.value)} />
+                    <Input placeholder={'Search for friends'} style={{ paddingVertical: 5, borderRadius: 5, marginVertical: 10, backgroundColor: 'rgb(242, 242, 242)', borderWidth: 0 }} leftIcon={<AntDesign name="search1" size={10} style={{}} color="" />} value={name} func={(text: any) => setName(text.target.value)} />
                     <FlatList
                         renderItem={({ item }) => {
                             return (
@@ -145,16 +45,24 @@ const friends = () => {
                                             </View>
                                         }
                                         <View>
-                                            <ThemedText type='defaultSemiBold'>{item.name}</ThemedText>
+                                            <ThemedText type='defaultSemiBold'>{item.firstName} {item.lastName}</ThemedText>
                                         </View>
                                     </View>
-                                    <TouchableOpacity style={{ backgroundColor: 'rgb(242, 242, 242)', paddingHorizontal: 15, paddingVertical: 2, borderRadius: 20 }}>
-                                        <Text>Unfriend</Text>
-                                    </TouchableOpacity>
+                                    {
+                                        item.type === 'friend' ?
+                                            <TouchableOpacity onPress={()=> unfriend(item.id)} style={{ backgroundColor: 'rgb(242, 242, 242)', paddingHorizontal: 15, paddingVertical: 2, borderRadius: 20 }}>
+                                                <Text>Unfriend</Text>
+                                            </TouchableOpacity>
+                                            :
+                                            <TouchableOpacity onPress={()=>acceptFriend(item.id,item.firstName,item.lastName) } style={{ backgroundColor: 'rgb(242, 242, 242)', paddingHorizontal: 15, paddingVertical: 2, borderRadius: 20 }}>
+                                                <Text>Accept</Text>
+                                            </TouchableOpacity>
+                                    }
+
                                 </View>
                             )
                         }}
-                        data={messagedata}
+                        data={friends}
                         contentContainerStyle={{ gap: 20, marginVertical: 20 }}
                         showsHorizontalScrollIndicator={false}
                     />
