@@ -1,5 +1,5 @@
 import { FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { ThemedView } from '@/components/ThemedView'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { ThemedText } from '@/components/ThemedText';
@@ -7,22 +7,27 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Input from '@/components/Input';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { useRouter } from 'expo-router';
+import ChatContext from '@/helperFn/RegisterContextApi';
 const ws = new WebSocket('ws://localhost:8080');
 
 const home = () => {
-    let data: any = []
-    let messagedata: any = []
-    const [friend, setFriend] = useState('')
+    const { getFriendMessage,user } = useContext(ChatContext)
+    const [friend, setFriend] = useState()
+    const [name, setName] = useState("")
     const { height } = useWindowDimensions()
     const [modal, setModal] = useState(false)
     const truncateText = (text?: string, maxLength?: number) => {
         if (text && maxLength) return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
     };
     const router = useRouter()
-    console.log(modal)
+    console.log(friend,'friend')
     // ws.onopen = () => {
     //     ws.send(JSON.stringify({ type: 'register', userId: 'personA' }));
     // };
+    useEffect(() => {
+        getFriendMessage(setFriend,name)
+    }, [name,user])
+    
 
     return (
         <View>
@@ -42,7 +47,7 @@ const home = () => {
                         </TouchableOpacity>
                     </ThemedView>
                     <View style={{ paddingHorizontal: 10 }}>
-                        <Input placeholder={'First Name'} style={{ paddingVertical: 5, borderRadius: 5, marginVertical: 10, backgroundColor: 'rgb(242, 242, 242)', borderWidth: 0 }} leftIcon={<AntDesign name="search1" size={10} style={{}} color="" />} value={friend} func={(text: any) => setFriend(text.target.value)} />
+                        <Input placeholder={'First Name'} style={{ paddingVertical: 5, borderRadius: 5, marginVertical: 10, backgroundColor: 'rgb(242, 242, 242)', borderWidth: 0 }} leftIcon={<AntDesign name="search1" size={10} style={{}} color="" />} value={name} func={(text: any) => setName(text.target.value)} />
                         <FlatList
                             renderItem={({ item }) => {
                                 return (
@@ -61,7 +66,7 @@ const home = () => {
                                     </TouchableOpacity>
                                 )
                             }}
-                            data={data}
+                            data={friend}
                             horizontal
                             contentContainerStyle={{ gap: 20, marginVertical: 20 }}
                             showsHorizontalScrollIndicator={false}
@@ -75,7 +80,7 @@ const home = () => {
                                             item.group ?
                                                 <View style={[styles.imageCon]}>
                                                     {
-                                                        item.group.map((member:any, index:number) => {
+                                                        item.group.map((member: any, index: number) => {
                                                             return (
                                                                 <>
                                                                     {
@@ -127,7 +132,7 @@ const home = () => {
                                     </View>
                                 )
                             }}
-                            data={messagedata}
+                            data={friend}
                             contentContainerStyle={{ gap: 20, marginVertical: 20 }}
                             showsHorizontalScrollIndicator={false}
                         />
@@ -152,18 +157,18 @@ const Modal = () => {
                 width: '70%',
                 height: '100%',
                 gap: 10,
-                backgroundColor:'white',
-                position:'absolute',
-                zIndex:20,
-                padding:30
+                backgroundColor: 'white',
+                position: 'absolute',
+                zIndex: 20,
+                padding: 30
             }}>
-                <TouchableOpacity onPress={()=>router.push('/chat/friends') }>
+                <TouchableOpacity onPress={() => router.push('/chat/friends')}>
                     <Text>Friends</Text>
                 </TouchableOpacity>
             </View>
             <View style={{
                 backgroundColor: 'red', height: '100%', width: '100%',
-                opacity:0.5
+                opacity: 0.5
             }}>
 
             </View>

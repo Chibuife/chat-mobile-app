@@ -12,7 +12,7 @@ const friends = () => {
     const [name, setName] = useState('')
     const { height } = useWindowDimensions()
     const [friends, setFriends] = useState()
-    const { getFriends, acceptFriend, unfriend } = useContext(ChatContext)
+    const { getFriends, acceptFriend, unfriend, } = useContext(ChatContext)
     const router = useRouter()
     console.log(friends)
     useEffect(() => {

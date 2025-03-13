@@ -15,7 +15,8 @@ const ChatContext = createContext({
     sendRequest: (id: string, setAdded: Function) => { },
     getFriends: (name: string, setUsers: Function) => { },
     acceptFriend: (id: string) => { },
-    unfriend: (id: string) => { }
+    unfriend: (id: string) => { },
+    getFriendMessage:async (setUsers: Function, name: String) => {}
 });
 
 interface UserObj {
@@ -29,9 +30,6 @@ export const ChatProvider = ({ children }) => {
     const [ws, setWs] = useState(null);
     const router = useRouter()
     const pathname = usePathname();
-
-
-   
     const loadUser = async () => {
         const storedUser = await AsyncStorage.getItem("user");
         if (storedUser) {
@@ -40,6 +38,7 @@ export const ChatProvider = ({ children }) => {
     };
     useEffect(() => {
             loadUser();
+            console.log('loaded')
     }, [pathname]);
 
     const isTokenExpired = () => {
@@ -88,13 +87,15 @@ export const ChatProvider = ({ children }) => {
     const loginUser = async (email, password) => {
         console.log('hi', email, password)
         AsyncStorage.removeItem("user")
-        setUser()
-        const response = await apiRequest('http://localhost:8080/api/v1/auth/login', { email, password }, "POST", setUser, router)
+       await apiRequest('http://localhost:8080/api/v1/auth/login', { email, password }, "POST", setUser, router)
     };
 
     const getAllUsers = async (setUsers: Function, name: String) => {
-        console.log(user, 'uuazs')
         user && await apiRequest('http://localhost:8080/api/v1/getallusers', { username: name, id: user._id }, "POST", setUsers)
+    }
+    const getFriendMessage = async (setUsers: Function, name: String) => {
+        console.log(user,"uazi")
+        user && await apiRequest('http://localhost:8080/api/v1/getfriendswithmessage', { username: name, id: user._id }, "POST", setUsers)
     }
     const sendRequest = async (id: string, setAdded: Function) => {
         user && await apiRequest('http://localhost:8080/api/v1/friendRequest', { userId: user._id, id }, "POST", setAdded)
@@ -122,7 +123,7 @@ export const ChatProvider = ({ children }) => {
     // };
 
     return (
-        <ChatContext.Provider value={{ user, friends, messages, registerUser, loginUser, getAllUsers, sendRequest, getFriends, acceptFriend, unfriend }}>
+        <ChatContext.Provider value={{ user, friends, messages, registerUser, loginUser, getAllUsers, sendRequest, getFriends, acceptFriend, unfriend, getFriendMessage }}>
             {children}
         </ChatContext.Provider>
     );
