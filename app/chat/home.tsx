@@ -51,7 +51,7 @@ const home = () => {
                         <FlatList
                             renderItem={({ item }) => {
                                 return (
-                                    <TouchableOpacity onPress={() => router.push('/chat/abc')} style={styles.profile}>
+                                    <TouchableOpacity onPress={() => router.push(`/chat/${item.id}`)} style={styles.profile}>
                                         <View style={styles.imageCon}>
                                             {
                                                 item.image ?
@@ -62,7 +62,7 @@ const home = () => {
                                             }
                                             <View style={styles.active} />
                                         </View>
-                                        <ThemedText>{item.name}</ThemedText>
+                                        <ThemedText>{item.firstName} {item.lastName}</ThemedText>
                                     </TouchableOpacity>
                                 )
                             }}
@@ -75,7 +75,7 @@ const home = () => {
                         <FlatList
                             renderItem={({ item }) => {
                                 return (
-                                    <View style={styles.message}>
+                                    <TouchableOpacity onPress={()=> router.push(`/chat/${item.id}`)} style={styles.message}>
                                         {
                                             item.group ?
                                                 <View style={[styles.imageCon]}>
@@ -124,12 +124,12 @@ const home = () => {
                                         }
 
                                         <View>
-                                            <ThemedText type='defaultSemiBold'>{item.name}</ThemedText>
+                                            <ThemedText type='defaultSemiBold'>{item.firstName} {item.lastName}</ThemedText>
                                             <ThemedText>
                                                 {truncateText(item.message, 20)} . {item.date}
                                             </ThemedText>
                                         </View>
-                                    </View>
+                                    </TouchableOpacity>
                                 )
                             }}
                             data={friend}

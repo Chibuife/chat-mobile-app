@@ -1,8 +1,9 @@
 import { Alert, Button, FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
 import { useRouter } from 'expo-router'
+import { useRoute } from "@react-navigation/native";
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -10,7 +11,8 @@ import { Audio } from 'expo-av';
 import Slider from "@react-native-community/slider";
 import * as ImagePicker from "expo-image-picker";
 import { Image } from 'react-native'
-import { sendMessage } from '@/helperFn'
+// import { sendMessage } from '@/helperFn'
+import ChatContext from '@/helperFn/RegisterContextApi'
 const ws = new WebSocket('ws://localhost:8080');
 
 
@@ -19,10 +21,11 @@ interface Progress {
     index: number, position: number
 }
 const message = () => {
+    const {user, sendMessage, getChatHistory, messages} = useContext(ChatContext)
     const router = useRouter()
     const { height } = useWindowDimensions()
     const ref = useRef(null)
-    const [messages, setMessages] = useState<Message[] | undefined>()
+    // const [messages, setMessages] = useState<Message[] | undefined>()
     const currentTime = new Date().toLocaleTimeString();
     const [recording, setRecording] = useState<any>(null);
     const [isPlaying, setIsPlaying] = useState<number>(-1);
@@ -31,19 +34,13 @@ const message = () => {
     const [currentIndex, setCurrentIndex] = useState<number>();
     const sound = useRef(new Audio.Sound());
     const progressInterval = useRef<any>(null);
-
-    // Listen for messages
-    ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.type === 'history') {
-            console.log('Chat history:', data.messages);
-            setMessages(data.messages)
-        } else {
-            console.log(`Message from ${data.from}: ${data.message}`);
-            setMessages([...messages,data.messages])
-
-        }
-    };
+    const route = useRoute();
+    const { id } = route.params || {};
+    console.log(id,user, 'id')
+    useEffect(()=>{
+        getChatHistory(id)
+   },[id])
+  
 
     const openCamera = async () => {
         // Request camera permissions
@@ -60,22 +57,22 @@ const message = () => {
             quality: 1,
         });
 
-        if (!result.canceled) {
-            setMessages([
-                ...(messages ?? []), {
-                    mess: result.assets[0].uri,
-                    time: currentTime,
-                    type: 'image'
-                }
-            ])
-        }
+        // if (!result.canceled) {
+        //     setMessages([
+        //         ...(messages ?? []), {
+        //             mess: result.assets[0].uri,
+        //             time: currentTime,
+        //             type: 'image'
+        //         }
+        //     ])
+        // }
     };
 
     // Load the audio
     const loadAudio = async (uri: string, index: number) => {
         try {
             console.log("Loading audio...");
-            await sound.current.unloadAsync(); // Ensure previous sound is unloaded
+            await sound.current.unloadAsync();
             await sound.current.loadAsync({ uri }, {}, true);
             const status: any = await sound.current.getStatusAsync();
             setDuration(status.durationMillis || 1);
@@ -165,13 +162,13 @@ const message = () => {
         const uri = recording.getURI();
         // setRecordingUri(uri);
         setRecording(null);
-        setMessages([
-            ...(messages ?? []), {
-                mess: uri,
-                time: currentTime,
-                type: 'audio'
-            }
-        ])
+        // setMessages([
+        //     ...(messages ?? []), {
+        //         mess: uri,
+        //         time: currentTime,
+        //         type: 'audio'
+        //     }
+        // ])
         console.log("Recording saved at:", uri);
     };
 
@@ -188,28 +185,7 @@ const message = () => {
                     <ThemedText type='subtitle' style={{}}>Darren</ThemedText>
                     <AntDesign name="setting" size={20} color={'#1877F2'} style={{}} />
                 </ThemedView>
-                {/* 
-                {
-                    messages.map((item, index) => {
-                        console.log(item)
-                        return (
-                            <View>
-                                <Button title={isPlaying ? "Pause" : "Play"} onPress={() => togglePlayPause(index, item.mess)} />
-                                <Slider
-                                    value={index === progress.index ? progress.position : 0}
-                                    maximumValue={duration}
-                                    onSlidingComplete={seekAudio}
-                                    minimumTrackTintColor="blue"
-                                    maximumTrackTintColor="gray"
-                                    thumbTintColor="red"
-                                />
 
-                                {item.type === 'image' && <Image source={{ uri: item.mess }} style={{ width: 200, height: 200, marginTop: 20 }} />}
-
-                            </View>
-                        )
-                    })
-                } */}
                 <FlatList
                     data={messages}
                     renderItem={({ item, index }: { item: any, index: number }) => {
@@ -241,10 +217,12 @@ const message = () => {
                         //         type: 'text'
                         //     }
                         // ])
-                        sendMessage(toUserId,ref.current.value,fromUserId)
-                        ref.current.value = ""
+                        sendMessage(id,ref?.current?.value)
+                        if (ref.current) {
+                            ref.current.value = ""; 
+                          }
                     }}>
-                        <Ionicons name='send' size={20} color={ref.current.value !== "" ? "#1877F2" : "#7eaae4"} />
+                        <Ionicons name='send' size={20} color={ref?.current?.value !== "" ? "#1877F2" : "#7eaae4"} />
                     </TouchableOpacity>
                 </View>
             </View>

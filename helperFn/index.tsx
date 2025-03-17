@@ -16,23 +16,23 @@ const ws = new WebSocket('ws://localhost:8080');
 // }
 
 // Get chat history
-export function getChatHistory(toUserId, userId) {
-    ws.send(JSON.stringify({
-        type: 'get_history',
-        userId: userId,
-        to: toUserId
-    }));
-}
+// export function getChatHistory(toUserId, userId) {
+//     ws.send(JSON.stringify({
+//         type: 'get_history',
+//         userId: userId,
+//         to: toUserId
+//     }));
+// }
 
 // // Listen for messages
-// ws.onmessage = (event) => {
-//     const data = JSON.parse(event.data); 
-//     if (data.type === 'history') {
-//         console.log('Chat history:', data.messages);
-//     } else {
-//         console.log(`Message from ${data.from}: ${data.message}`);
-//     }
-// };
+ws.onmessage = (event) => {
+    const data = JSON.parse(event.data); 
+    if (data.type === 'history') {
+        console.log('Chat history:', data.messages);
+    } else {
+        console.log(`Message from ${data.from}: ${data.message}`);
+    }
+};
 
 // Example Usage
 setTimeout(() => {
