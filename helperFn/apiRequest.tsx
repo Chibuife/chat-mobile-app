@@ -10,7 +10,7 @@ export const apiRequest = async (url, body, method, setData?: Function, router?:
         .then(async (res) => await res.json())
         .then(async (data) => {
             console.log(data)
-            if (data.token && router && setData) {
+            if (data.token && router) {
                 const decoded = jwtDecode(data.token);
                 AsyncStorage.setItem("user", JSON.stringify(decoded,data.token))
                 router.push('/chat/home')

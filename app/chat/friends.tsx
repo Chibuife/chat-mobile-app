@@ -12,7 +12,7 @@ const friends = () => {
     const [name, setName] = useState('')
     const { height } = useWindowDimensions()
     const [friends, setFriends] = useState()
-    const { getFriends, acceptFriend, unfriend, } = useContext(ChatContext)
+    const { getFriends, acceptFriend, unfriend, cancelReq } = useContext(ChatContext)
     const router = useRouter()
     console.log(friends)
     useEffect(() => {
@@ -57,8 +57,9 @@ const friends = () => {
                                                 }, 3000);
                                             }} style={{ backgroundColor: 'rgb(242, 242, 242)', paddingHorizontal: 15, paddingVertical: 2, borderRadius: 20 }}>
                                                 <Text>Unfriend</Text>
-                                            </TouchableOpacity>
-                                            :
+                                            </TouchableOpacity> 
+                                           :
+                                            item.type === 'friendRequest' ? 
                                             <TouchableOpacity onPress={()=>{
                                                 acceptFriend(item.id,)
                                                 setTimeout(() => {
@@ -66,6 +67,15 @@ const friends = () => {
                                                 }, 3000);
                                                 } } style={{ backgroundColor: 'rgb(242, 242, 242)', paddingHorizontal: 15, paddingVertical: 2, borderRadius: 20 }}>
                                                 <Text>Accept</Text>
+                                            </TouchableOpacity>
+                                            :
+                                            <TouchableOpacity onPress={()=>{
+                                                cancelReq(item.id,)
+                                                setTimeout(() => {
+                                                    getFriends(name, setFriends)
+                                                }, 3000);
+                                                } } style={{ backgroundColor: 'rgb(242, 242, 242)', paddingHorizontal: 15, paddingVertical: 2, borderRadius: 20 }}>
+                                                <Text>Cancel</Text>
                                             </TouchableOpacity>
                                     }
 

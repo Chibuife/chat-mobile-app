@@ -28,7 +28,13 @@ const home = () => {
         getFriendMessage(setFriend,name)
     }, [name,user])
     
-
+    const formatTime = (timestamp) => {
+        return new Date(timestamp).toLocaleTimeString("en-GB", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false, // Ensures 24-hour format (16:23)
+        });
+    };
     return (
         <View>
             {
@@ -62,7 +68,7 @@ const home = () => {
                                             }
                                             <View style={styles.active} />
                                         </View>
-                                        <ThemedText>{item.firstName} {item.lastName}</ThemedText>
+                                        <ThemedText>{item.firstName}</ThemedText>
                                     </TouchableOpacity>
                                 )
                             }}
@@ -126,7 +132,7 @@ const home = () => {
                                         <View>
                                             <ThemedText type='defaultSemiBold'>{item.firstName} {item.lastName}</ThemedText>
                                             <ThemedText>
-                                                {truncateText(item.message, 20)} . {item.date}
+                                                {truncateText(item.lastMessage.text, 20)} . {formatTime(item.lastMessage.timestamp)}
                                             </ThemedText>
                                         </View>
                                     </TouchableOpacity>

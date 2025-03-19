@@ -25,14 +25,14 @@ const ws = new WebSocket('ws://localhost:8080');
 // }
 
 // // Listen for messages
-ws.onmessage = (event) => {
-    const data = JSON.parse(event.data); 
-    if (data.type === 'history') {
-        console.log('Chat history:', data.messages);
-    } else {
-        console.log(`Message from ${data.from}: ${data.message}`);
-    }
-};
+// ws.onmessage = (event) => {
+//     const data = JSON.parse(event.data); 
+//     if (data.type === 'history') {
+//         console.log('Chat history:', data.messages);
+//     } else {
+//         console.log(`Message from ${data.from}: ${data.message}`);
+//     }
+// };
 
 // Example Usage
 setTimeout(() => {

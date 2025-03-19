@@ -21,7 +21,7 @@ interface Progress {
     index: number, position: number
 }
 const message = () => {
-    const {user, sendMessage, getChatHistory, messages} = useContext(ChatContext)
+    const {user, sendMessage, getChatHistory, messages, ws, getFriend} = useContext(ChatContext)
     const router = useRouter()
     const { height } = useWindowDimensions()
     const ref = useRef(null)
@@ -32,16 +32,17 @@ const message = () => {
     const [progress, setProgress] = useState<Progress>();
     const [duration, setDuration] = useState<any>(1);
     const [currentIndex, setCurrentIndex] = useState<number>();
+    const [currentFriend, setCurrentFriend] = useState()
     const sound = useRef(new Audio.Sound());
     const progressInterval = useRef<any>(null);
     const route = useRoute();
     const { id } = route.params || {};
-    console.log(id,user, 'id')
+    console.log(id,user,currentFriend,'id')
     useEffect(()=>{
-        getChatHistory(id)
-   },[id])
+        getFriend(id, setCurrentFriend)
+       setTimeout(()=>getChatHistory(id),3000) 
+   },[id,ws])
   
-
     const openCamera = async () => {
         // Request camera permissions
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -182,7 +183,7 @@ const message = () => {
                             <AntDesign name="left" size={20} style={{}} color="" />
                         </Pressable>
                     </View>
-                    <ThemedText type='subtitle' style={{}}>Darren</ThemedText>
+                    <ThemedText type='subtitle' style={{}}>{currentFriend?.firstName}</ThemedText>
                     <AntDesign name="setting" size={20} color={'#1877F2'} style={{}} />
                 </ThemedView>
 
@@ -190,7 +191,7 @@ const message = () => {
                     data={messages}
                     renderItem={({ item, index }: { item: any, index: number }) => {
                         return (
-                            <SentMessage item={item} isPlaying={isPlaying} togglePlayPause={togglePlayPause} seekAudio={seekAudio} progress={progress} index={index} duration={duration} />
+                            <SentMessage item={item} user={user} isPlaying={isPlaying} togglePlayPause={togglePlayPause} seekAudio={seekAudio} progress={progress} index={index} duration={duration} />
                         )
                     }}
                 />
@@ -210,19 +211,12 @@ const message = () => {
                         <TextInput ref={ref} style={{ flex: 1, outline: 'none' }} />
                     </View>
                     <TouchableOpacity onPress={() => {
-                        // setMessages([
-                        //     ...(messages ?? []), {
-                        //         mess: ref.current.value,
-                        //         time: currentTime,
-                        //         type: 'text'
-                        //     }
-                        // ])
-                        sendMessage(id,ref?.current?.value)
+                        ref?.current?.value !=="" && sendMessage(id,ref?.current?.value)
                         if (ref.current) {
-                            ref.current.value = ""; 
+                            ref.current.value = "" 
                           }
                     }}>
-                        <Ionicons name='send' size={20} color={ref?.current?.value !== "" ? "#1877F2" : "#7eaae4"} />
+                        <Ionicons name='send' size={20} color={ref?.current?.value ? "#1877F2" : "#7eaae4"} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -230,9 +224,10 @@ const message = () => {
     )
 }
 
-const SentMessage = ({ item, togglePlayPause, seekAudio, progress, index, duration, isPlaying }: { item: any, togglePlayPause: Function, seekAudio: any, progress: any, index: Number, duration: any, isPlaying: Number }) => {
+const SentMessage = ({ item, togglePlayPause, seekAudio, progress, index, duration, isPlaying,user }: { item: any, togglePlayPause: Function, seekAudio: any, progress: any, index: Number, duration: any, isPlaying: Number, user:any }) => {
+   console.log(user.id,'idnn')
     return (
-        <View style={{ width: '100%', alignItems: 'flex-end', flexDirection: item.sender === 'chibuife' ? 'row-reverse' : 'row', gap: 2 }}>
+        <View style={{ width: '100%', alignItems: 'flex-end', flexDirection: item.from === user._id ? 'row' : 'row-reverse', gap: 2 }}>
             {
                 item.image ?
                     <Image source={require('@/assets/images/react-logo.png')} style={styles.image} />
@@ -240,7 +235,7 @@ const SentMessage = ({ item, togglePlayPause, seekAudio, progress, index, durati
                         <Ionicons name="person" size={30} style={{ marginTop: 10 }} color="rgb(225 225 225)" />
                     </View>
             }
-            <View style={[styles.message, { borderBottomLeftRadius: item.sender !== 'chibuife' ? 20 : 0, borderBottomRightRadius: item.sender === 'chibuife' ? 20 : 0, justifyContent: item.sender === 'chibuife' ? 'flex-end' : 'flex-start', backgroundColor: item.sender === 'chibuife' ? '#1877F2' : '#b2b2b2' }]}>
+            <View style={[styles.message, { borderBottomLeftRadius: item.from === user._id ? 0 : 20, borderBottomRightRadius: item.from === user._id ? 20 : 0, justifyContent: item.from === user._id ? 'flex-start' : 'flex-end', backgroundColor: item.from === user._id ? '#b2b2b2' : '#1877F2' }]}>
                 {item.type === 'image' && <Image source={{ uri: item.mess }} style={{ width: 200, height: 200, marginTop: 20 }} />}
                 {item.type === 'audio' && <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
                     <Pressable onPress={() => togglePlayPause(index, item.mess)} style={{ borderRadius: '100%', borderWidth: 1, borderColor: '#1877F2', width: 10, height: 10 }}>
@@ -256,8 +251,8 @@ const SentMessage = ({ item, togglePlayPause, seekAudio, progress, index, durati
                         maximumTrackTintColor="gray"
                         thumbTintColor="red"
                     /></View>}
-                {item.type === 'text' && <Text style={{ color: item.sender === 'chibuife' ? 'white' : 'black', padding: 20 }}>{item.mess}</Text>}
-                <Text style={{ textAlign: item.sender === 'chibuife' ? 'left' : 'right' }}>{item.time}</Text>
+                {item.text  && <Text style={{ color: item.from === user._id ? 'black' : 'white', padding: 20 }}>{item.text}</Text>}
+                <Text style={{ textAlign: item.from === user._id ? 'right' : 'left' }}>{item.time}</Text>
             </View>
         </View>
     )

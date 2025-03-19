@@ -4,11 +4,12 @@ import login from "@/app/auth/login";
 import { useRouter, usePathname } from "expo-router";
 import { jwtDecode } from "jwt-decode";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-const ws = new WebSocket("ws://localhost:8080");
+// const ws = new WebSocket("ws://localhost:8080");
 const ChatContext = createContext({
     user: null,
     friends: [],
     messages: [],
+    ws: null,
     registerUser: (userDetails, email, password) => { },
     loginUser: (email, password) => { },
     getAllUsers: (setUsers: Function, name: String) => { },
@@ -18,7 +19,9 @@ const ChatContext = createContext({
     unfriend: (id: string) => { },
     getFriendMessage: async (setUsers: Function, name: String) => { },
     sendMessage: (toUserId, text) => { },
-    getChatHistory: (toUserId) => { }
+    getChatHistory: (toUserId) => { },
+    getFriend:async(id:string, setUsers:Function) =>{},
+    cancelReq:(id:string)=>{}
 });
 
 interface UserObj {
@@ -29,7 +32,7 @@ export const ChatProvider = ({ children }) => {
     const [user, setUser] = useState<any>();
     const [friends, setFriends] = useState([]);
     const [messages, setMessages] = useState([]);
-    // const [ws, setWs] = useState(null);
+    const [ws, setWs] = useState(null);
     const router = useRouter()
     const pathname = usePathname();
     const loadUser = async () => {
@@ -58,16 +61,16 @@ export const ChatProvider = ({ children }) => {
     };
     useEffect(() => {
         if (user) {
-            // const socket = new WebSocket("ws://localhost:8080");
+            const socket = new WebSocket("ws://localhost:8080");
 
-            ws.onopen = () => {
+            socket.onopen = () => {
                 console.log("Connected to WebSocket");
-                ws.send(JSON.stringify({ type: "register", userId: user._id }));
+                socket.send(JSON.stringify({ type: "register", userId: user._id }));
             };
 
-            ws.onmessage = (event) => {
+            socket.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-console.log('message h')
+                console.log('message h')
                 if (data.type === "history") {
                     setMessages(data.messages);
                 } else {
@@ -75,19 +78,18 @@ console.log('message h')
                 }
             };
 
-            // setWs(socket);
-            return () =>{
+            setWs(socket);
+            return () => {
                 console.log('close')
-                return ws.close()      
-            }         ;
+                return socket.close()
+            }
         }
-    }, []);
+    }, [user]);
 
     const registerUser = async (userDetails, email, password) => {
         console.log('hi', userDetails?.lastName, userDetails?.firstName, email, password)
         AsyncStorage.removeItem("user")
-        setUser()
-        await apiRequest('http://localhost:8080/api/v1/auth/signup', { lastName: userDetails.lastName, firstName: userDetails.firstName, email, password }, "POST", undefined, router)
+        await apiRequest('http://localhost:8080/api/v1/auth/signup', { lastName: userDetails.lastName, firstName: userDetails.firstName, email, password }, "POST", setUser, router)
     };
 
     const loginUser = async (email, password) => {
@@ -100,7 +102,6 @@ console.log('message h')
         user && await apiRequest('http://localhost:8080/api/v1/getallusers', { username: name, id: user._id }, "POST", setUsers)
     }
     const getFriendMessage = async (setUsers: Function, name: String) => {
-        console.log(user, "uazi")
         user && await apiRequest('http://localhost:8080/api/v1/getfriendswithmessage', { username: name, id: user._id }, "POST", setUsers)
     }
     const sendRequest = async (id: string, setAdded: Function) => {
@@ -114,11 +115,22 @@ console.log('message h')
         user && await apiRequest('http://localhost:8080/api/v1/addfriend', { userId: user._id, id }, "POST",)
     }
 
+    const cancelReq = async (id: string) => {
+        user && await apiRequest('http://localhost:8080/api/v1/addfriend', { userId: user._id, id }, "POST",)
+    } 
     const unfriend = async (id: string) => {
         user && await apiRequest('http://localhost:8080/api/v1/removeFriend', { userId: user._id, id }, "POST")
     }
+
+    const getFriend = async(id:string, setUsers:Function) =>{
+        await apiRequest('http://localhost:8080/api/v1/getUser', {  id }, "POST", setUsers) 
+    }
     const sendMessage = (toUserId, text) => {
-        if (ws && user) {
+        if (ws && user && ws.readyState === WebSocket.OPEN) {
+            const newMessage = { text, from: user._id, to: toUserId, timestamp: new Date() };
+
+            setMessages((prevMessages) => [...prevMessages, newMessage]);
+
             ws.send(JSON.stringify({
                 type: "private_message",
                 from: user._id,
@@ -129,8 +141,8 @@ console.log('message h')
     };
 
     function getChatHistory(toUserId) {
-        console.log( toUserId, user?._id, 'mmmess')
-        if (ws && user) {
+        console.log(ws, 'ws')
+        if (ws && user && ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify({
                 type: 'get_history',
                 userId: user._id,
@@ -139,10 +151,10 @@ console.log('message h')
         }
     }
 
-   
+
 
     return (
-        <ChatContext.Provider value={{ user, friends, messages, registerUser, loginUser, getAllUsers, sendRequest, getFriends, acceptFriend, unfriend, getFriendMessage, sendMessage, getChatHistory }}>
+        <ChatContext.Provider value={{ user, friends, messages, ws, registerUser, loginUser, getAllUsers, sendRequest, getFriends, acceptFriend, unfriend, getFriendMessage, sendMessage, getChatHistory, getFriend, cancelReq }}>
             {children}
         </ChatContext.Provider>
     );
