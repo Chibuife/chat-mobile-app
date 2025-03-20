@@ -9,11 +9,12 @@ import Button from '@/components/Button';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { useRouter } from 'expo-router';
+import Modal from '@/components/modal';
 
 const profile = () => {
     const [image, setImage] = useState<string | null>(null);
+    const [modal, setModal] = useState(false)
     const pickImage = async () => {
-        // No permissions request is necessary for launching the image library
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
             allowsEditing: true,
@@ -26,12 +27,17 @@ const profile = () => {
     };
     const router = useRouter()
     return (
-        <ThemedView style={{flex:1}}>
-            <ThemedView style={{ padding: 10, alignItems:'center', flexDirection:'row', borderBottomWidth: 1, borderBottomColor:'rgb(225 225 225)' }}>
-                <Ionicons name="menu-outline" size={30} style={{}} color="" />
-                <ThemedText type='subtitle'  style={{ textAlign: "center", flex:1 }}>My Profile</ThemedText>
+        <ThemedView style={{ flex: 1 }}>
+            {
+                modal ? <Modal setModal={setModal} /> : null
+            }
+            <ThemedView style={{ padding: 10, alignItems: 'center', flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: 'rgb(225 225 225)' }}>
+                <TouchableOpacity onPress={() => setModal(true)}>
+                    <Ionicons name="menu-outline" size={30} style={{}} color="" />
+                </TouchableOpacity>
+                <ThemedText type='subtitle' style={{ textAlign: "center", flex: 1 }}>My Profile</ThemedText>
             </ThemedView>
-\            <View style={styles.profileImageContainer}>
+            \            <View style={styles.profileImageContainer}>
                 {image ? <Image source={{ uri: image }} height={120} width={120} style={styles.image} /> : <View style={styles.imageContainer}>
                     <Ionicons name="person" size={130} style={{ marginTop: 10 }} color="rgb(225 225 225)" />
                 </View>}
@@ -39,24 +45,24 @@ const profile = () => {
                     <FontAwesome name="camera" size={20} color="rgb(255 255 255)" style={{ opacity: 0.8 }} />
                 </TouchableOpacity>
             </View>
-            <ThemedText type='subtitle' style={{textAlign:'center'}}>Chibuife John</ThemedText>
-            <View style={{marginVertical:50}}>
-                <Pressable style={styles.navItem} onPress={()=> router.push('/profile/edith')}>
-                    <View style={{flexDirection:'row', gap:20, alignItems:'center'}}>
+            <ThemedText type='subtitle' style={{ textAlign: 'center' }}>Chibuife John</ThemedText>
+            <View style={{ marginVertical: 50 }}>
+                <Pressable style={styles.navItem} onPress={() => router.push('/profile/edith')}>
+                    <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center' }}>
                         <Ionicons name="person-circle-outline" size={20} style={{}} color="rgb(98 111 209)" />
                         <ThemedText>Account Details</ThemedText>
                     </View>
                     <AntDesign name="right" size={20} style={{}} color="rgb(197 196 196)" />
                 </Pressable>
-                <Pressable style={styles.navItem} onPress={()=> router.push('/profile/setting')}>
-                    <View style={{flexDirection:'row', gap:20, alignItems:'center'}}>
+                <Pressable style={styles.navItem} onPress={() => router.push('/profile/setting')}>
+                    <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center' }}>
                         <AntDesign name="setting" size={20} style={{}} />
                         <ThemedText>Setting</ThemedText>
                     </View>
                     <AntDesign name="right" size={20} style={{}} color="rgb(197 196 196)" />
                 </Pressable>
                 <Pressable style={styles.navItem}>
-                    <View style={{flexDirection:'row', gap:20, alignItems:'center'}}>
+                    <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center' }}>
                         <FontAwesome6 name="phone-volume" size={20} style={{}} color="green" />
                         <ThemedText>Contact Us</ThemedText>
                     </View>
@@ -103,11 +109,11 @@ const styles = StyleSheet.create({
         width: 120,
         height: 120,
     },
-    navItem:{
-        flexDirection:'row',
-        justifyContent:'space-between',
+    navItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         paddingHorizontal: 20,
-        alignItems:'center',
-        marginVertical:10
+        alignItems: 'center',
+        marginVertical: 10
     }
 })

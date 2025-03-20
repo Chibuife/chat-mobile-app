@@ -8,21 +8,27 @@ import Input from '@/components/Input';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { useRouter } from 'expo-router';
 import ChatContext from '@/helperFn/RegisterContextApi';
+import Modal from '@/components/modal';
 const friends = () => {
     const [name, setName] = useState('')
     const { height } = useWindowDimensions()
     const [friends, setFriends] = useState()
     const { getFriends, acceptFriend, unfriend, cancelReq } = useContext(ChatContext)
     const router = useRouter()
-    console.log(friends)
+    const [modal, setModal] = useState(false)
     useEffect(() => {
         getFriends(name, setFriends)
     }, [name])
     return (
         <ScrollView>
+            {
+                modal ? <Modal setModal={setModal} /> : null
+            }
             <ThemedView style={{ flex: 1, minHeight: height, }}>
-                <ThemedView style={{ paddingVertical: 40, padding: 10, alignItems: 'center', flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: 'rgb(225 225 225)', justifyContent: 'space-between' }}>
-                    <Ionicons name="menu-outline" size={30} style={{}} color="" />
+                <ThemedView style={{ paddingTop: 40, padding: 10, alignItems: 'center', flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: 'rgb(225 225 225)', justifyContent: 'space-between' }}>
+                    <TouchableOpacity onPress={()=> setModal(true)}>
+                        <Ionicons name="menu-outline" size={30} style={{}} color="" />
+                    </TouchableOpacity>
                     <ThemedText type='subtitle' style={{}}>Friends</ThemedText>
                     <View></View>
                 </ThemedView>
@@ -50,33 +56,33 @@ const friends = () => {
                                     </View>
                                     {
                                         item.type === 'friend' ?
-                                            <TouchableOpacity onPress={()=> {
+                                            <TouchableOpacity onPress={() => {
                                                 unfriend(item.id)
                                                 setTimeout(() => {
                                                     getFriends(name, setFriends)
                                                 }, 3000);
                                             }} style={{ backgroundColor: 'rgb(242, 242, 242)', paddingHorizontal: 15, paddingVertical: 2, borderRadius: 20 }}>
                                                 <Text>Unfriend</Text>
-                                            </TouchableOpacity> 
-                                           :
-                                            item.type === 'friendRequest' ? 
-                                            <TouchableOpacity onPress={()=>{
-                                                acceptFriend(item.id,)
-                                                setTimeout(() => {
-                                                    getFriends(name, setFriends)
-                                                }, 3000);
-                                                } } style={{ backgroundColor: 'rgb(242, 242, 242)', paddingHorizontal: 15, paddingVertical: 2, borderRadius: 20 }}>
-                                                <Text>Accept</Text>
                                             </TouchableOpacity>
                                             :
-                                            <TouchableOpacity onPress={()=>{
-                                                cancelReq(item.id,)
-                                                setTimeout(() => {
-                                                    getFriends(name, setFriends)
-                                                }, 3000);
-                                                } } style={{ backgroundColor: 'rgb(242, 242, 242)', paddingHorizontal: 15, paddingVertical: 2, borderRadius: 20 }}>
-                                                <Text>Cancel</Text>
-                                            </TouchableOpacity>
+                                            item.type === 'friendRequest' ?
+                                                <TouchableOpacity onPress={() => {
+                                                    acceptFriend(item.id,)
+                                                    setTimeout(() => {
+                                                        getFriends(name, setFriends)
+                                                    }, 3000);
+                                                }} style={{ backgroundColor: 'rgb(242, 242, 242)', paddingHorizontal: 15, paddingVertical: 2, borderRadius: 20 }}>
+                                                    <Text>Accept</Text>
+                                                </TouchableOpacity>
+                                                :
+                                                <TouchableOpacity onPress={() => {
+                                                    cancelReq(item.id,)
+                                                    setTimeout(() => {
+                                                        getFriends(name, setFriends)
+                                                    }, 3000);
+                                                }} style={{ backgroundColor: 'rgb(242, 242, 242)', paddingHorizontal: 15, paddingVertical: 2, borderRadius: 20 }}>
+                                                    <Text>Cancel</Text>
+                                                </TouchableOpacity>
                                     }
 
                                 </View>

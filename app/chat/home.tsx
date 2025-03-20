@@ -1,5 +1,5 @@
-import { FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native'
-import React, { useContext, useEffect, useState } from 'react'
+import { FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View, Animated, PanResponder, } from 'react-native'
+import React, { useContext, useEffect, useState, useRef } from 'react'
 import { ThemedView } from '@/components/ThemedView'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { ThemedText } from '@/components/ThemedText';
@@ -9,9 +9,11 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import { useRouter } from 'expo-router';
 import ChatContext from '@/helperFn/RegisterContextApi';
 const ws = new WebSocket('ws://localhost:8080');
+import { useRoute } from "@react-navigation/native";
+import Modal from '@/components/modal';
 
 const home = () => {
-    const { getFriendMessage,user } = useContext(ChatContext)
+    const { getFriendMessage, user } = useContext(ChatContext)
     const [friend, setFriend] = useState()
     const [name, setName] = useState("")
     const { height } = useWindowDimensions()
@@ -20,25 +22,25 @@ const home = () => {
         if (text && maxLength) return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
     };
     const router = useRouter()
-    console.log(friend,'friend')
+    console.log(friend, 'friend')
     // ws.onopen = () => {
     //     ws.send(JSON.stringify({ type: 'register', userId: 'personA' }));
     // };
     useEffect(() => {
-        getFriendMessage(setFriend,name)
-    }, [name,user])
-    
-    const formatTime = (timestamp) => {
+        getFriendMessage(setFriend, name)
+    }, [name, user])
+
+    const formatTime = (timestamp:any) => {
         return new Date(timestamp).toLocaleTimeString("en-GB", {
             hour: "2-digit",
             minute: "2-digit",
-            hour12: false, // Ensures 24-hour format (16:23)
+            hour12: false, 
         });
     };
     return (
         <View>
             {
-                modal ? <Modal /> : <Text>model</Text>
+                modal ? <Modal setModal={setModal} /> : null
             }
             <ScrollView>
 
@@ -81,7 +83,7 @@ const home = () => {
                         <FlatList
                             renderItem={({ item }) => {
                                 return (
-                                    <TouchableOpacity onPress={()=> router.push(`/chat/${item.id}`)} style={styles.message}>
+                                    <TouchableOpacity onPress={() => router.push(`/chat/${item.id}`)} style={styles.message}>
                                         {
                                             item.group ?
                                                 <View style={[styles.imageCon]}>
@@ -151,36 +153,78 @@ const home = () => {
 
 export default home
 
-const Modal = () => {
-    const router = useRouter()
+// const Modal = ({setModal}) => {
+//     const router = useRouter()
+//     const route = useRoute();
+//         const translateX = useRef(new Animated.Value(0)).current;
+//         console.log(route,'route')
+//        const panResponder = useRef(
+//         PanResponder.create({
+//             onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dx) > 10,
+//             onPanResponderMove: (_, gestureState) => {
+//                 if (gestureState.dx < 0) {
+//                     translateX.setValue(gestureState.dx);
+//                 }
+//             },
+//             onPanResponderRelease: (_, gestureState) => {
+//                 if (gestureState.dx < -100) {
+//                     Animated.timing(translateX, {
+//                         toValue: -500, 
+//                         duration: 200,
+//                         useNativeDriver: true,
+//                     }).start(() => setModal(false)); // Close modal
+//                 } else {
+//                     Animated.spring(translateX, {
+//                         toValue: 0, // Reset to original position
+//                         useNativeDriver: true,
+//                     }).start();
+//                 }
+//             },
+//         })
+//     ).current;
+//     return (
+//         <View
+//             style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, zIndex: 11 }}
+//         >
+//             <Animated.View
+//                 {...panResponder.panHandlers} style={{
+//                 left: 0,
+//                 width: '70%',
+//                 height: '100%',
+//                 gap: 10,
+//                 backgroundColor: 'white',
+//                 position: 'absolute',
+//                 zIndex: 20,
+//                 padding: 30
+//             }}>
+//                 <TouchableOpacity style={[styles.option, { backgroundColor: route.path === '/chat/home' ? 'red':'' }]} onPress={() => router.push('/chat/home')}>
+//                     <Text>Home</Text>
+//                 </TouchableOpacity>
+//                 <TouchableOpacity style={[styles.option, { backgroundColor: route.path === '/chat/friends' ? 'red':'' }]} onPress={() => router.push('/chat/friends')}>
+//                     <Text>Friends</Text>
+//                 </TouchableOpacity>
+//                 <TouchableOpacity style={[styles.option, { backgroundColor: route.path === '/chat/findPeople' ? 'red':'' }]} onPress={() => router.push('/chat/findPeople')}>
+//                     <Text>Find Friends</Text>
+//                 </TouchableOpacity>
+//                 <TouchableOpacity style={[styles.option, { backgroundColor: route.path === '/profile/setting' ? 'red':'' }]} onPress={() => router.push('/profile/setting')}>
+//                     <Text>Setting</Text>
+//                 </TouchableOpacity>
+//                 <TouchableOpacity style={[styles.option, { backgroundColor: route.path === '/profile' ? 'red':'' }]} onPress={() => router.push('/profile')}>
+//                     <Text>Profile</Text>
+//                 </TouchableOpacity>
+//                 <TouchableOpacity style={[styles.option, { position:'absolute', bottom:10 }]}  onPress={() => router.push('/')}>
+//                     <Text>Logout</Text>
+//                 </TouchableOpacity>
+//             </Animated.View>
+//             <TouchableOpacity onPress={()=> setModal(false)} style={{
+//                 backgroundColor: 'black', height: '100%', width: '100%',
+//                 opacity: 0.5
+//             }}>
 
-    return (
-        <View
-            style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, zIndex: 11 }}
-        >
-            <View style={{
-                left: 0,
-                width: '70%',
-                height: '100%',
-                gap: 10,
-                backgroundColor: 'white',
-                position: 'absolute',
-                zIndex: 20,
-                padding: 30
-            }}>
-                <TouchableOpacity onPress={() => router.push('/chat/friends')}>
-                    <Text>Friends</Text>
-                </TouchableOpacity>
-            </View>
-            <View style={{
-                backgroundColor: 'red', height: '100%', width: '100%',
-                opacity: 0.5
-            }}>
-
-            </View>
-        </View>
-    )
-}
+//             </TouchableOpacity>
+//         </View>
+//     )
+// }
 const styles = StyleSheet.create({
     profile: {
         alignItems: 'center',
@@ -216,5 +260,11 @@ const styles = StyleSheet.create({
     message: {
         flexDirection: 'row',
         gap: 20,
+    },
+    option: {
+        padding: 5,
+        borderTopEndRadius: 20,
+        borderBottomEndRadius: 20,
+        marginVertical: 5
     }
 })

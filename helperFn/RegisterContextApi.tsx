@@ -116,7 +116,7 @@ export const ChatProvider = ({ children }) => {
     }
 
     const cancelReq = async (id: string) => {
-        user && await apiRequest('http://localhost:8080/api/v1/addfriend', { userId: user._id, id }, "POST",)
+        user && await apiRequest('http://localhost:8080/api/v1/cancelFriendReq', { userId: user._id, id }, "POST",)
     } 
     const unfriend = async (id: string) => {
         user && await apiRequest('http://localhost:8080/api/v1/removeFriend', { userId: user._id, id }, "POST")
