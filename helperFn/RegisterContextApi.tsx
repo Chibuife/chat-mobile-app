@@ -10,7 +10,7 @@ const ChatContext = createContext({
     friends: [],
     messages: [],
     ws: null,
-    registerUser: (userDetails, email, password) => { },
+    registerUser: (userDetails, email, password,image) => { },
     loginUser: (email, password) => { },
     getAllUsers: (setUsers: Function, name: String) => { },
     sendRequest: (id: string, setAdded: Function) => { },
@@ -41,10 +41,10 @@ export const ChatProvider = ({ children }) => {
             setUser(JSON.parse(storedUser));
         }
     };
-    console.log(messages)
+    console.log(user,'userkju')
     useEffect(() => {
         loadUser();
-        console.log('loaded')
+        console.log(user,'loaded')
     }, [pathname]);
 
     const isTokenExpired = () => {
@@ -86,10 +86,11 @@ export const ChatProvider = ({ children }) => {
         }
     }, [user]);
 
-    const registerUser = async (userDetails, email, password) => {
-        console.log('hi', userDetails?.lastName, userDetails?.firstName, email, password)
+    const registerUser = async (userDetails, formData) => {
+        // console.log('hi', userDetails?.lastName, userDetails?.firstName, email, password)
         AsyncStorage.removeItem("user")
-        await apiRequest('http://localhost:8080/api/v1/auth/signup', { lastName: userDetails.lastName, firstName: userDetails.firstName, email, password }, "POST", setUser, router)
+        const noheader=true
+        await apiRequest('http://localhost:8080/api/v1/auth/signup', formData, "POST", setUser, router, noheader)
     };
 
     const loginUser = async (email, password) => {

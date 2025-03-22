@@ -1,5 +1,5 @@
 import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -10,22 +10,34 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { useRouter } from 'expo-router';
 import Modal from '@/components/modal';
+import ChatContext from '@/helperFn/RegisterContextApi';
 
 const profile = () => {
-    const [image, setImage] = useState<string | null>(null);
+    const {  user  } = useContext(ChatContext);
+    const [imageFile, setImageFile] = useState()
     const [modal, setModal] = useState(false)
-    const pickImage = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 1,
-        });
-        if (!result.canceled) {
-            setImage(result.assets[0].uri);
-        }
-    };
+     const pickImage = async () => {
+           let result = await ImagePicker.launchImageLibraryAsync({
+               mediaTypes: ImagePicker.MediaTypeOptions.Images, 
+               allowsEditing: true,
+               aspect: [4, 3],
+               quality: 1,
+           });
+           if (!result.canceled) {
+               const fileType = result.assets[0].uri.split(";")[0].split(":")[1].split("/")[1];
+       
+               const imageFile = {
+                   uri: result.assets[0].uri, 
+                   name: `image.${fileType}`,
+                   type: `image/${fileType}`,
+               };
+               setImageFile(imageFile);
+               // setImage(result.assets[0].uri);
+           }
+       };
     const router = useRouter()
+    console.log(user,'user')
+    console.log('log')
     return (
         <ThemedView style={{ flex: 1 }}>
             {
@@ -37,15 +49,15 @@ const profile = () => {
                 </TouchableOpacity>
                 <ThemedText type='subtitle' style={{ textAlign: "center", flex: 1 }}>My Profile</ThemedText>
             </ThemedView>
-            \            <View style={styles.profileImageContainer}>
-                {image ? <Image source={{ uri: image }} height={120} width={120} style={styles.image} /> : <View style={styles.imageContainer}>
+                        <View style={styles.profileImageContainer}>
+                {user?.image ? <Image source={{ uri: user.image }} height={120} width={120} style={styles.image} /> : <View style={styles.imageContainer}>
                     <Ionicons name="person" size={130} style={{ marginTop: 10 }} color="rgb(225 225 225)" />
                 </View>}
                 <TouchableOpacity style={styles.picIcon} onPress={pickImage} >
                     <FontAwesome name="camera" size={20} color="rgb(255 255 255)" style={{ opacity: 0.8 }} />
                 </TouchableOpacity>
             </View>
-            <ThemedText type='subtitle' style={{ textAlign: 'center' }}>Chibuife John</ThemedText>
+            <ThemedText type='subtitle' style={{ textAlign: 'center' }}>{user?.firstName} {user?.lastName}</ThemedText>
             <View style={{ marginVertical: 50 }}>
                 <Pressable style={styles.navItem} onPress={() => router.push('/profile/edith')}>
                     <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center' }}>

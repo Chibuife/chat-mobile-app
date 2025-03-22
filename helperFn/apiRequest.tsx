@@ -1,12 +1,19 @@
 import { jwtDecode } from "jwt-decode";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const apiRequest = async (url, body, method, setData?: Function, router?: any,) => {
-    fetch(url, {
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-        method
-    })
+export const apiRequest = async (url, body, method, setData?: Function, router?: any,noheader?:any) => {
+    let options = {
+        method,
+        body,
+        headers: {
+          },
+    };
+    if (!noheader && !(body instanceof FormData)) {
+        options.headers["Content-Type"] = "application/json";
+        options.body = JSON.stringify(body);
+    }
+
+    fetch(url, options)
         .then(async (res) => await res.json())
         .then(async (data) => {
             console.log(data)

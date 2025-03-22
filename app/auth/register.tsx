@@ -24,17 +24,25 @@ const register = () => {
     })
     const router = useRouter()
     const [image, setImage] = useState<string | null>(null);
-    console.log(image)
+    const [imageFile, setImageFile] = useState()
+
     const pickImage = async () => {
-        // No permissions request is necessary for launching the image library
         let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
+            mediaTypes: ImagePicker.MediaTypeOptions.Images, 
             allowsEditing: true,
             aspect: [4, 3],
             quality: 1,
         });
         if (!result.canceled) {
-            setImage(result.assets[0].uri);
+            const fileType = result.assets[0].uri.split(";")[0].split(":")[1].split("/")[1];
+    
+            const imageFile = {
+                uri: result.assets[0].uri, 
+                name: `image.${fileType}`,
+                type: `image/${fileType}`,
+            };
+            setImageFile(imageFile);
+            // setImage(result.assets[0].uri);
         }
     };
 
@@ -47,8 +55,8 @@ const register = () => {
                 <ThemedText type='title' style={{ color: '#1877F2', paddingLeft: 20, paddingTop: 10 }}>Create new account</ThemedText>
                 <View style={styles.subContent}>
                     <View style={styles.profileImageContainer}>
-                        {image ?
-                            <Image source={{ uri: image }} height={120} width={120} style={styles.image} />
+                        {imageFile ?
+                            <Image source={{ uri: imageFile.uri }} height={120} width={120} style={styles.image} />
                             :
                             <View style={styles.imageContainer}>
                                 <Ionicons name="person" size={130} style={{ marginTop: 10 }} color="rgb(225 225 225)" />
@@ -61,7 +69,7 @@ const register = () => {
                         <Input placeholder={'First Name'} value={userDetails.firstName} func={(text: any) => setUserDetails({ ...userDetails, firstName: text.target.value })} />
                         <Input placeholder={'Last Name'} value={userDetails.lastName} func={(text: any) => setUserDetails({ ...userDetails, lastName: text.target.value })} />
                     </View>
-                    {registerWith === "phone" ? <RegisterWithPhoneNumber /> : <RegisterWithEmail userDetails={userDetails} registerUser={registerUser} />}
+                    {registerWith === "phone" ? <RegisterWithPhoneNumber /> : <RegisterWithEmail userDetails={userDetails} image={imageFile} registerUser={registerUser} />}
                     <ThemedText type='default' style={{ marginVertical: 10 }}>OR</ThemedText>
                     {/* <Button label={'Login With Facebook'} bgcolor="#1877F2" txcolor='white' major={true} func={scrollTo} />
                 <Button bgcolor="black" label={'Sign In With Apple'} txcolor='white' major={true} func={scrollTo} /> */}
