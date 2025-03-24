@@ -4,7 +4,6 @@ import Input from '../Input';
 import { ThemedText } from '../ThemedText';
 import Button from '../Button';
 import Entypo from 'react-native-vector-icons/Entypo';
-import { ImageEditor } from 'react-native';
 
 const RegisterWithEmail = ({registerUser, userDetails, image}:{registerUser:Function, userDetails:any, image:any}) => {
     const [email, setEmail] = useState('');
@@ -26,17 +25,9 @@ const RegisterWithEmail = ({registerUser, userDetails, image}:{registerUser:Func
                 const formData = new FormData();
                 formData.append("email",email);
                 formData.append("password",password);
-              
                 formData.append("profilePicture", blob, image.name);
-
                 console.log("Selected file:", image)
                 console.log([...formData]);
-// console.log("FormData content:", formData.get("profilePicture"));
-// console.log(image,{
-//     uri: image.uri,  // Image file URI
-//                     name: image.name, // File name
-//                     type: image.type,
-// })
                 registerUser(userDetails,formData)
                 }} />
         </View>

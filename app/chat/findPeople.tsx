@@ -25,13 +25,12 @@ const findPeople = () => {
         added ? setIds([...ids, added.id]) :null
     },[added])
     return (
-        <ScrollView>
             <ThemedView style={{ flex: 1, minHeight: height, }}>
                 <ThemedView style={{ paddingTop: 40, padding: 10, alignItems: 'center', flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: 'rgb(225 225 225)', justifyContent: 'space-between' }}>
                     <Input placeholder={'Search for friends'} style={{ paddingVertical: 5, width: '80%', borderRadius: 5, marginVertical: 10, backgroundColor: 'rgb(242, 242, 242)', borderWidth: 0 }} leftIcon={<AntDesign name="search1" size={10} style={{}} color="" />} value={name} func={(text: any) => setName(text.target.value)} />
                     <Text style={{ color: '#1877F2' }}>Cancel</Text>
                 </ThemedView>
-                <View style={{ paddingHorizontal: 10 }}>
+                <View style={{ paddingHorizontal: 10, flex:1,  }}>
                     <FlatList
                         renderItem={({ item }) => {
                             return (
@@ -41,7 +40,7 @@ const findPeople = () => {
                                             <View style={styles.imageCon}>
                                                 {
                                                     item.image ?
-                                                        <Image source={require('@/assets/images/react-logo.png')} style={styles.image} />
+                                                        <Image source={{uri:item.image}} style={styles.image} />
                                                         : <View style={styles.dummy}>
                                                             <Ionicons name="person" size={30} style={{ marginTop: 10 }} color="rgb(225 225 225)" />
                                                         </View>
@@ -71,7 +70,6 @@ const findPeople = () => {
                     />
                 </View>
             </ThemedView>
-        </ScrollView>
     )
 }
 

@@ -13,7 +13,7 @@ import Modal from '@/components/modal';
 import ChatContext from '@/helperFn/RegisterContextApi';
 
 const profile = () => {
-    const {  user  } = useContext(ChatContext);
+    const {  user, updateProfile } = useContext(ChatContext);
     const [imageFile, setImageFile] = useState()
     const [modal, setModal] = useState(false)
      const pickImage = async () => {
@@ -31,13 +31,17 @@ const profile = () => {
                    name: `image.${fileType}`,
                    type: `image/${fileType}`,
                };
-               setImageFile(imageFile);
-               // setImage(result.assets[0].uri);
+            //    setImageFile(imageFile);
+               const response = await fetch(result.assets[0].uri);
+               const blob = await response.blob();
+               const formData = new FormData();
+               formData.append("profilePicture", blob, `image.${fileType}`);
+               formData.append("_id",user?._id);
+               updateProfile(formData)
            }
        };
     const router = useRouter()
-    console.log(user,'user')
-    console.log('log')
+    
     return (
         <ThemedView style={{ flex: 1 }}>
             {

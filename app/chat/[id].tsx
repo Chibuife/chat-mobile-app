@@ -21,7 +21,7 @@ interface Progress {
     index: number, position: number
 }
 const message = () => {
-    const {user, sendMessage, getChatHistory, messages, ws, getFriend} = useContext(ChatContext)
+    const { user, sendMessage, getChatHistory, messages, ws, getFriend } = useContext(ChatContext)
     const router = useRouter()
     const { height } = useWindowDimensions()
     const ref = useRef(null)
@@ -37,12 +37,12 @@ const message = () => {
     const progressInterval = useRef<any>(null);
     const route = useRoute();
     const { id } = route.params || {};
-    console.log(id,user,currentFriend,'id')
-    useEffect(()=>{
+    console.log(id, user, currentFriend, 'id')
+    useEffect(() => {
         getFriend(id, setCurrentFriend)
-       setTimeout(()=>getChatHistory(id),3000) 
-   },[id,ws])
-  
+        setTimeout(() => getChatHistory(id), 3000)
+    }, [id, ws])
+
     const openCamera = async () => {
         // Request camera permissions
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -57,16 +57,9 @@ const message = () => {
             aspect: [4, 3],
             quality: 1,
         });
-
-        // if (!result.canceled) {
-        //     setMessages([
-        //         ...(messages ?? []), {
-        //             mess: result.assets[0].uri,
-        //             time: currentTime,
-        //             type: 'image'
-        //         }
-        //     ])
-        // }
+        // const response = await fetch(result.assets[0].uri);
+        // const blob = await response.blob();
+        sendMessage(id, null, result.assets[0].uri)
     };
 
     // Load the audio
@@ -175,84 +168,96 @@ const message = () => {
 
 
     return (
-        <ScrollView>
-            <View style={{ minHeight: height, backgroundColor: 'white' }}>
-                <ThemedView style={{ paddingTop: 40, padding: 10, alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: 'rgb(225 225 225)' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', }}>
+        <View style={{ flex: 1 }}>
+            <View style={{ flex: 1, minHeight: height, backgroundColor: 'white' }}>
+                {/* Header */}
+                <ThemedView style={{
+                    paddingTop: 40, padding: 10, alignItems: 'center', flexDirection: 'row',
+                    justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: 'rgb(225 225 225)'
+                }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <Pressable onPress={() => router.back()}>
-                            <AntDesign name="left" size={20} style={{}} color="" />
+                            <AntDesign name="left" size={20} color="" />
                         </Pressable>
                     </View>
-                    <ThemedText type='subtitle' style={{}}>{currentFriend?.firstName}</ThemedText>
-                    <AntDesign name="setting" size={20} color={'#1877F2'} style={{}} />
+                    <ThemedText type='subtitle'>{currentFriend?.firstName}</ThemedText>
+                    <AntDesign name="setting" size={20} color={'#1877F2'} />
                 </ThemedView>
 
+                {/* Chat Messages - FlatList should be the only scrollable component */}
                 <FlatList
                     data={messages}
-                    renderItem={({ item, index }: { item: any, index: number }) => {
-                        return (
-                            <SentMessage item={item} user={user} isPlaying={isPlaying} togglePlayPause={togglePlayPause} seekAudio={seekAudio} progress={progress} index={index} duration={duration} />
-                        )
-                    }}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({ item, index }) => (
+                        <SentMessage item={item} user={user} isPlaying={isPlaying} togglePlayPause={togglePlayPause} seekAudio={seekAudio} progress={progress} index={index} duration={duration} />
+                    )}
+                    contentContainerStyle={{ flexGrow: 1 }}
+                    style={{ flex: 1, marginBottom: 50, }}
                 />
+
+                {/* Message Input Section */}
                 <View style={styles.buttomSection}>
-                    <Pressable
-                        onPress={openCamera}
-                    >
-                        <FontAwesome name="camera" size={20} color="#1877F2" style={{}} />
+                    <Pressable onPress={openCamera}>
+                        <FontAwesome name="camera" size={20} color="#1877F2" />
                     </Pressable>
                     <View style={styles.inputContainer}>
-                        <Pressable onPressIn={startRecording}
-                            onPressOut={stopRecording}>
-                            <FontAwesome name="microphone"
-                                size={20} color="#1877F2" style={{}} />
+                        <Pressable onPressIn={startRecording} onPressOut={stopRecording}>
+                            <FontAwesome name="microphone" size={20} color="#1877F2" />
                         </Pressable>
-                        {/* {recording  ? <FontAwesome5 name="microphone-slash" size={20} color="#1877F2" style={{}} />} */}
                         <TextInput ref={ref} style={{ flex: 1, outline: 'none' }} />
                     </View>
                     <TouchableOpacity onPress={() => {
-                        ref?.current?.value !=="" && sendMessage(id,ref?.current?.value)
-                        if (ref.current) {
-                            ref.current.value = "" 
-                          }
+                        if (ref?.current?.value) {
+                            sendMessage(id, ref?.current?.value);
+                            ref.current.value = "";
+                        }
                     }}>
                         <Ionicons name='send' size={20} color={ref?.current?.value ? "#1877F2" : "#7eaae4"} />
                     </TouchableOpacity>
                 </View>
             </View>
-        </ScrollView>
+        </View>
     )
 }
 
-const SentMessage = ({ item, togglePlayPause, seekAudio, progress, index, duration, isPlaying,user }: { item: any, togglePlayPause: Function, seekAudio: any, progress: any, index: Number, duration: any, isPlaying: Number, user:any }) => {
-   console.log(user.id,'idnn')
+const SentMessage = ({ item, togglePlayPause, seekAudio, progress, index, duration, isPlaying, user }: { item: any, togglePlayPause: Function, seekAudio: any, progress: any, index: Number, duration: any, isPlaying: Number, user: any }) => {
+    console.log(item, 'idnn')
+    const formatTime = (timestamp: any) => {
+        return new Date(timestamp).toLocaleTimeString("en-GB", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+        });
+    };
     return (
-        <View style={{ width: '100%', alignItems: 'flex-end', flexDirection: item.from === user._id ? 'row' : 'row-reverse', gap: 2 }}>
+        <View style={{ width: '100%', alignItems: 'flex-end', flexDirection: item.from === user._id ? 'row' : 'row-reverse', gap: 2, marginVertical: 20 }}>
             {
-                item.image ?
-                    <Image source={require('@/assets/images/react-logo.png')} style={styles.image} />
+                user.image ?
+                    <Image source={{ uri: user.image }} style={styles.image} />
                     : <View style={styles.dummy}>
                         <Ionicons name="person" size={30} style={{ marginTop: 10 }} color="rgb(225 225 225)" />
                     </View>
             }
-            <View style={[styles.message, { borderBottomLeftRadius: item.from === user._id ? 0 : 20, borderBottomRightRadius: item.from === user._id ? 20 : 0, justifyContent: item.from === user._id ? 'flex-start' : 'flex-end', backgroundColor: item.from === user._id ? '#b2b2b2' : '#1877F2' }]}>
-                {item.type === 'image' && <Image source={{ uri: item.mess }} style={{ width: 200, height: 200, marginTop: 20 }} />}
-                {item.type === 'audio' && <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-                    <Pressable onPress={() => togglePlayPause(index, item.mess)} style={{ borderRadius: '100%', borderWidth: 1, borderColor: '#1877F2', width: 10, height: 10 }}>
-                        {
-                            isPlaying === index ? <AntDesign name='caretright' size={20} color="#1877F2" /> :
-                                <AntDesign name='pause' size={20} color="#1877F2" />}
-                    </Pressable>
-                    <Slider
-                        value={index === progress.index ? progress.position : 0}
-                        maximumValue={duration}
-                        onSlidingComplete={seekAudio}
-                        minimumTrackTintColor="blue"
-                        maximumTrackTintColor="gray"
-                        thumbTintColor="red"
-                    /></View>}
-                {item.text  && <Text style={{ color: item.from === user._id ? 'black' : 'white', padding: 20 }}>{item.text}</Text>}
-                <Text style={{ textAlign: item.from === user._id ? 'right' : 'left' }}>{item.time}</Text>
+            <View>
+                <View style={[styles.message, { borderBottomLeftRadius: item.from === user._id ? 0 : 20, borderBottomRightRadius: item.from === user._id ? 20 : 0, justifyContent: item.from === user._id ? 'flex-start' : 'flex-end', backgroundColor: item.from === user._id ? '#b2b2b2' : '#1877F2' }]}>
+                    {item.image && <Image source={{ uri: item.image }} style={{ width: 200, height: 200 }} />}
+                    {item.type === 'audio' && <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                        <Pressable onPress={() => togglePlayPause(index, item.mess)} style={{ borderRadius: '100%', borderWidth: 1, borderColor: '#1877F2', width: 10, height: 10 }}>
+                            {
+                                isPlaying === index ? <AntDesign name='caretright' size={20} color="#1877F2" /> :
+                                    <AntDesign name='pause' size={20} color="#1877F2" />}
+                        </Pressable>
+                        <Slider
+                            value={index === progress.index ? progress.position : 0}
+                            maximumValue={duration}
+                            onSlidingComplete={seekAudio}
+                            minimumTrackTintColor="blue"
+                            maximumTrackTintColor="gray"
+                            thumbTintColor="red"
+                        /></View>}
+                        {item.text  && <Text style={{ color: item.from === user._id ? 'black' : 'white', padding: 20 }}>{item.text}</Text>}
+                </View>
+                <Text style={{ textAlign: item.from === user._id ? 'right' : 'left', position: 'absolute', bottom: -10 }}>{formatTime(item.timestamp)}</Text>
             </View>
         </View>
     )
@@ -277,17 +282,17 @@ const styles = StyleSheet.create({
         height: 60,
         borderTopWidth: 1,
         borderTopColor: 'rgb(225 225 225)',
-        marginTop: 30,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-around'
+        justifyContent: 'space-around',
+        backgroundColor: 'white',
     },
     message: {
-        backgroundColor: 'red',
         marginVertical: 5,
         borderTopRightRadius: 20,
         borderTopLeftRadius: 20,
-        maxWidth: '70%'
+        // maxWidth: '70%',
+        overflow: 'hidden'
     },
     dummy: {
         width: 20,

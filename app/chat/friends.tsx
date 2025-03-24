@@ -9,6 +9,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import { useRouter } from 'expo-router';
 import ChatContext from '@/helperFn/RegisterContextApi';
 import Modal from '@/components/modal';
+import Button from '@/components/Button';
 const friends = () => {
     const [name, setName] = useState('')
     const { height } = useWindowDimensions()
@@ -32,9 +33,11 @@ const friends = () => {
                     <ThemedText type='subtitle' style={{}}>Friends</ThemedText>
                     <View></View>
                 </ThemedView>
-                <View style={{ paddingHorizontal: 10 }}>
-                    <Input placeholder={'Search for friends'} style={{ paddingVertical: 5, borderRadius: 5, marginVertical: 10, backgroundColor: 'rgb(242, 242, 242)', borderWidth: 0 }} leftIcon={<AntDesign name="search1" size={10} style={{}} color="" />} value={name} func={(text: any) => setName(text.target.value)} />
-                    <FlatList
+                <Input placeholder={'Search for friends'}  style={{ paddingVertical: 5, borderRadius: 5, marginVertical: 10, backgroundColor: 'rgb(242, 242, 242)', borderWidth: 0 }} leftIcon={<AntDesign name="search1" size={10} style={{}} color="" />} value={name} func={(text: any) => setName(text.target.value)} />
+                <View style={{ paddingHorizontal: 10, justifyContent:friends?.length < 1 ?"center":"", alignItems:friends?.length < 1 ?'center':'', flex:1 }}>
+                   {friends?.length < 1 ?
+                                   <Button label={'Find Friends'} width={200} borderRadius={5} bgcolor="#1877F2" txcolor='white' major={true} func={()=> router.push('/chat/findPeople')} />
+                   :<FlatList
                         renderItem={({ item }) => {
                             return (
                                 <View style={styles.message}>
@@ -43,7 +46,7 @@ const friends = () => {
                                             <View style={styles.imageCon}>
                                                 {
                                                     item.image ?
-                                                        <Image source={require('@/assets/images/react-logo.png')} style={styles.image} />
+                                                        <Image source={{uri:item.image}} style={styles.image} />
                                                         : <View style={styles.dummy}>
                                                             <Ionicons name="person" size={30} style={{ marginTop: 10 }} color="rgb(225 225 225)" />
                                                         </View>
@@ -92,6 +95,7 @@ const friends = () => {
                         contentContainerStyle={{ gap: 20, marginVertical: 20 }}
                         showsHorizontalScrollIndicator={false}
                     />
+                }        
                 </View>
             </ThemedView>
         </ScrollView>
