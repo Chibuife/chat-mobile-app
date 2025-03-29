@@ -13,7 +13,7 @@ import Button from '@/components/Button';
 const friends = () => {
     const [name, setName] = useState('')
     const { height } = useWindowDimensions()
-    const [friends, setFriends] = useState()
+    const [friends, setFriends] = useState([])
     const { getFriends, acceptFriend, unfriend, cancelReq } = useContext(ChatContext)
     const router = useRouter()
     const [modal, setModal] = useState(false)

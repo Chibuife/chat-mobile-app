@@ -24,7 +24,11 @@ const ChatContext = createContext({
     cancelReq:(id:string)=>{},
     updateProfile:async(formData)=>{},
     forgottenPassword:(email) => {},
-    resetpassword:async (password) => {}
+    resetpassword:async (password,token) => {},
+    createGroup:async(addMember,groupName)=>{},
+    getGroupChatHistory:(toGroupId)=> {},
+    sendGroupMessage:async (toUserId, text, imageUri) => {},
+    getGroup:async(id:string, setState:Function) =>{}
 });
 
 interface UserObj {
@@ -104,7 +108,7 @@ export const ChatProvider = ({ children }) => {
     const forgottenPassword = async (email) => {
         await apiRequest('http://localhost:8080/api/v1/auth/forgotten-password', { email }, "POST", setConfirm)
     };
-    const resetpassword = async (password,token) => {
+    const resetpassword = async (password:string,token:String) => {
         await apiRequest(`http://localhost:8080/api/v1/auth/reset-password?token=${token}`, { password }, "PUT", setConfirm)
     };
     const getAllUsers = async (setState: Function, name: String) => {
@@ -134,11 +138,17 @@ export const ChatProvider = ({ children }) => {
     const getFriend = async(id:string, setState:Function) =>{
         await apiRequest('http://localhost:8080/api/v1/getUser', {  id }, "POST", setState) 
     }
-
+    const getGroup = async(id:string, setState:Function) =>{
+        await apiRequest('http://localhost:8080/api/v1/getGroup', {  id }, "POST", setState) 
+    }
     const updateProfile = async(formData)=>{
         const noheader=true
         const saveuser = true
         await apiRequest('http://localhost:8080/api/v1/updateProfile', formData, "POST", setUser, undefined, noheader,saveuser)
+    }
+
+    const createGroup = async(addMember,groupName,setGroupId)=>{
+        user && await apiRequest('http://localhost:8080/api/v1/createGroup', { members: addMember, name: groupName }, "POST", setGroupId)
     }
 
     const uriToBase64 = async (uri) => {
@@ -160,7 +170,6 @@ export const ChatProvider = ({ children }) => {
                 to: toUserId, 
                 timestamp: new Date() 
             };
-    
             if (imageUri) {
                 // const reader = new FileReader();
                 // reader.onload = function (event) {
@@ -188,7 +197,6 @@ export const ChatProvider = ({ children }) => {
                     text
                 }));
             }
-    
             setMessages((prevMessages) => [...prevMessages, newMessage]);
         }
     };
@@ -204,10 +212,56 @@ export const ChatProvider = ({ children }) => {
         }
     }
 
+    function getGroupChatHistory(toGroupId) {
+
+        if (ws && user && ws.readyState === WebSocket.OPEN) {
+            console.log(user, ws,'get_group_history')
+            ws.send(JSON.stringify({
+                type: 'get_group_history',
+                userId: user._id,
+                group: toGroupId
+            }));
+        }
+    }
+
+    const sendGroupMessage = async (toUserId, text, imageUri) => {
+        if (ws && user && ws.readyState === WebSocket.OPEN) {
+            const newMessage = { 
+                text, 
+                from: user._id, 
+                to: toUserId, 
+                timestamp: new Date() 
+            };
+            if (imageUri) {
+                let base64Image = null;
+
+                if (imageUri) {
+                    base64Image = await uriToBase64(imageUri); 
+                }
+                    ws.send(JSON.stringify({
+                        type: "group_message",
+                        from: user._id,
+                        to: toUserId,
+                        text: text || "",
+                        image: base64Image,  
+                    }));
+                    newMessage.image = base64Image
+            } else {
+                ws.send(JSON.stringify({
+                    type: "group_message",
+                    from: user._id,
+                    to: toUserId,
+                    text
+                }));
+            }
+    
+            setMessages((prevMessages) => [...prevMessages, newMessage]);
+        }
+    };
 
 
     return (
-        <ChatContext.Provider value={{ user, friends, messages, ws, registerUser, loginUser, getAllUsers, sendRequest, getFriends, acceptFriend, unfriend, getFriendMessage, sendMessage, getChatHistory, getFriend, cancelReq,updateProfile, forgottenPassword,resetpassword }}>
+        <ChatContext.Provider value={{ user, friends, messages, ws, registerUser, loginUser, getAllUsers, sendRequest, getFriends, acceptFriend, unfriend, getFriendMessage, sendMessage, getChatHistory, getFriend, cancelReq,updateProfile, forgottenPassword,resetpassword,createGroup,getGroupChatHistory,sendGroupMessage,getGroup }}>
             {children}
         </ChatContext.Provider>
     );

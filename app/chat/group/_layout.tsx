@@ -10,18 +10,15 @@ import { ChatProvider } from '@/helperFn/RegisterContextApi';
 
 
 
-export default function ChatLayout() {
+export default function GroupLayout() {
   const colorScheme = useColorScheme();
 
   return (
     <ChatProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
-          <Stack.Screen name="home" options={{ headerShown: false }} />
-          <Stack.Screen name="findPeople" options={{ headerShown: false }} />
-          <Stack.Screen name="friends" options={{ headerShown: false }} />
+          <Stack.Screen name="creategroup" options={{ headerShown: false }} />
           <Stack.Screen name="[id]" options={{ headerShown: false }} />
-          <Stack.Screen name="group" options={{ headerShown: false }} />
         </Stack>
         <StatusBar style="auto" /> 
       </ThemeProvider>

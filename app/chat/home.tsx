@@ -37,13 +37,12 @@ const home = () => {
         });
     };
     return (
-        <View>
+        <View style={{flex:1}}>
             {
                 modal ? <Modal setModal={setModal} /> : null
             }
-            <View>
-
-                <ThemedView style={{ flex: 1, minHeight: height, }}>
+            <View style={{flex:1}}>
+                <ThemedView style={{ flex: 1,  }}>
                     <ThemedView style={{ paddingTop: 40, padding: 10, alignItems: 'center', flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: 'rgb(225 225 225)', justifyContent: 'space-between' }}>
                         <TouchableOpacity onPress={() => setModal(true)}>
                             <Ionicons name="menu-outline" size={30} style={{}} color="" />
@@ -53,10 +52,11 @@ const home = () => {
                             <MaterialCommunityIcons name="notebook-edit-outline" size={20} style={{}} color="" />
                         </TouchableOpacity>
                     </ThemedView>
-                    <View style={{ paddingHorizontal: 10, justifyContent:friend?.length < 1 ?"center":"", alignItems:friend?.length < 1 ?'center':'',   }}>
+                    <View style={{ paddingHorizontal: 10, justifyContent: friend?.length < 1 ? "center" : "", alignItems: friend?.length < 1 ? 'center' : '',}}>
                         {/* <Input placeholder={'First Name'} style={{ paddingVertical: 5, borderRadius: 5, marginVertical: 10, backgroundColor: 'rgb(242, 242, 242)', borderWidth: 0 }} leftIcon={<AntDesign name="search1" size={10} style={{}} color="" />} value={name} func={(text: any) => setName(text.target.value)} /> */}
                         <FlatList
                             renderItem={({ item }) => {
+                                console.log(item.active)
                                 return (
                                     <TouchableOpacity onPress={() => router.push(`/chat/${item.id}`)} style={styles.profile}>
                                         <View style={styles.imageCon}>
@@ -67,7 +67,10 @@ const home = () => {
                                                         <Ionicons name="person" size={30} style={{ marginTop: 10 }} color="rgb(225 225 225)" />
                                                     </View>
                                             }
-                                            <View style={styles.active} />
+                                            {
+                                                item.active === true  ? <View style={styles.active} /> : null
+                                            }
+
                                         </View>
                                         <ThemedText>{item.firstName}</ThemedText>
                                     </TouchableOpacity>
@@ -75,17 +78,17 @@ const home = () => {
                             }}
                             data={friend}
                             horizontal
-                            contentContainerStyle={{ gap: 20, marginVertical: 20 }}
+                            contentContainerStyle={{ gap: 20, marginVertical: 20, flexGrow:0 }}
                             showsHorizontalScrollIndicator={false}
                         />
 
                         {
                             friend?.length < 1 ?
-                                <Button label={'Find Friends'} borderRadius={5} width={200}  bgcolor="#1877F2" txcolor='white' major={true} func={() => router.push('/chat/findPeople')} />
+                                <Button label={'Find Friends'} borderRadius={5} width={200} bgcolor="#1877F2" txcolor='white' major={true} func={() => router.push('/chat/findPeople')} />
                                 :
                                 <FlatList
                                     renderItem={({ item }) => {
-                                        return item?.lastMessage  ? (
+                                        return item?.lastMessage ? (
                                             <TouchableOpacity onPress={() => router.push(`/chat/${item.id}`)} style={styles.message}>
                                                 {
                                                     item.group ?
@@ -130,7 +133,9 @@ const home = () => {
                                                                         <Ionicons name="person" size={30} style={{ marginTop: 10 }} color="rgb(225 225 225)" />
                                                                     </View>
                                                             }
-                                                            <View style={styles.active} />
+                                                            {
+                                                                item.active === true ? <View style={styles.active} /> : null
+                                                            }
                                                         </View>
                                                 }
 
@@ -138,16 +143,16 @@ const home = () => {
                                                     <ThemedText type='defaultSemiBold'>{item?.firstName} {item?.lastName}</ThemedText>
                                                     <ThemedText>
                                                         {
-                                                            item.lastMessage.text ? <>{truncateText(item.lastMessage.text, 20)} . {formatTime(item.lastMessage.timestamp)}</> : <><Text style={{fontStyle:'italic'}}>image</Text> . {formatTime(item.lastMessage.timestamp)}</>
+                                                            item.lastMessage.text ? <>{truncateText(item.lastMessage.text, 20)} . {formatTime(item.lastMessage.timestamp)}</> : <><Text style={{ fontStyle: 'italic' }}>image</Text> . {formatTime(item.lastMessage.timestamp)}</>
                                                         }
-                                                                
+
                                                     </ThemedText>
                                                 </View>
                                             </TouchableOpacity>
                                         ) : null
                                     }}
                                     data={friend}
-                                    contentContainerStyle={{ gap: 20, marginVertical: 20 }}
+                                    contentContainerStyle={{ gap: 20, marginVertical: 20, flexGrow:0 }}
                                     showsHorizontalScrollIndicator={false}
                                 />}
                     </View>

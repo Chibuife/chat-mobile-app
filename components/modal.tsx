@@ -60,6 +60,9 @@ import { useRef } from 'react';
                 <TouchableOpacity style={[styles.option, { backgroundColor: route.path === '/profile' ? 'rgb(0 105 255 / 34%)':'' }]} onPress={() => router.push('/profile')}>
                     <Text>Profile</Text>
                 </TouchableOpacity>
+                  <TouchableOpacity style={[styles.option, { backgroundColor: route.path === '/profile' ? 'rgb(0 105 255 / 34%)':'' }]} onPress={() => router.push('/chat/group/creategroup')}>
+                  <Text>Create group</Text>
+              </TouchableOpacity>
                 <TouchableOpacity style={[styles.option, { backgroundColor: route.path === '/profile/setting' ? 'rrgb(0 105 255 / 34%)ed':'' }]} onPress={() => router.push('/profile/setting')}>
                     <Text>Setting</Text>
                 </TouchableOpacity>

@@ -20,27 +20,26 @@ interface Message { mess: any; time: string; type: string; }
 interface Progress {
     index: number, position: number
 }
-const message = () => {
-    const { user, sendMessage, getChatHistory, messages, ws, getFriend } = useContext(ChatContext)
+const groupMessage = () => {
+    const { user, sendGroupMessage, getGroupChatHistory, messages, ws, getGroup } = useContext(ChatContext)
     const router = useRouter()
     const { height } = useWindowDimensions()
     const ref = useRef(null)
-    // const [messages, setMessages] = useState<Message[] | undefined>()
     const currentTime = new Date().toLocaleTimeString();
     const [recording, setRecording] = useState<any>(null);
     const [isPlaying, setIsPlaying] = useState<number>(-1);
     const [progress, setProgress] = useState<Progress>();
     const [duration, setDuration] = useState<any>(1);
     const [currentIndex, setCurrentIndex] = useState<number>();
-    const [currentFriend, setCurrentFriend] = useState()
+    const [currentGroup, setCurrentGroup] = useState()
     const sound = useRef(new Audio.Sound());
     const progressInterval = useRef<any>(null);
     const route = useRoute();
     const { id } = route.params || {};
-    console.log(id, user, currentFriend, 'id')
+    console.log(messages, currentGroup, 'id')
     useEffect(() => {
-        getFriend(id, setCurrentFriend)
-        setTimeout(() => getChatHistory(id), 3000)
+        getGroup(id, setCurrentGroup)
+        setTimeout(() => getGroupChatHistory(id), 3000)
     }, [id, ws])
 
     const openCamera = async () => {
@@ -59,7 +58,7 @@ const message = () => {
         });
         // const response = await fetch(result.assets[0].uri);
         // const blob = await response.blob();
-        sendMessage(id, null, result.assets[0].uri)
+        sendGroupMessage(id, null, result.assets[0].uri)
     };
 
     // Load the audio
@@ -180,22 +179,20 @@ const message = () => {
                             <AntDesign name="left" size={20} color="" />
                         </Pressable>
                     </View>
-                    <ThemedText type='subtitle'>{currentFriend?.firstName}</ThemedText>
+                    <ThemedText type='subtitle'>{currentGroup?.name}</ThemedText>
                     <AntDesign name="setting" size={20} color={'#1877F2'} />
                 </ThemedView>
 
-                {/* Chat Messages - FlatList should be the only scrollable component */}
                 <FlatList
                     data={messages}
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={({ item, index }) => (
-                        <SentMessage item={item} currentFriend={currentFriend} user={user} isPlaying={isPlaying} togglePlayPause={togglePlayPause} seekAudio={seekAudio} progress={progress} index={index} duration={duration} />
+                        <SentMessage item={item} currentGroup={currentGroup} user={user} isPlaying={isPlaying} togglePlayPause={togglePlayPause} seekAudio={seekAudio} progress={progress} index={index} duration={duration} />
                     )}
                     contentContainerStyle={{ flexGrow: 1 }}
                     style={{ flex: 1, marginBottom: 50, }}
                 />
 
-                {/* Message Input Section */}
                 <View style={styles.buttomSection}>
                     <Pressable onPress={openCamera}>
                         <FontAwesome name="camera" size={20} color="#1877F2" />
@@ -208,7 +205,7 @@ const message = () => {
                     </View>
                     <TouchableOpacity onPress={() => {
                         if (ref?.current?.value) {
-                            sendMessage(id, ref?.current?.value);
+                            sendGroupMessage(id, ref?.current?.value);
                             ref.current.value = "";
                         }
                     }}>
@@ -220,8 +217,7 @@ const message = () => {
     )
 }
 
-const SentMessage = ({ item, togglePlayPause, seekAudio, progress, index, duration, isPlaying, user, currentFriend }: { item: any, togglePlayPause: Function, seekAudio: any, progress: any, index: Number, duration: any, isPlaying: Number, user: any, currentFriend: any }) => {
-    console.log(item, 'idnn')
+const SentMessage = ({ item, togglePlayPause, seekAudio, progress, index, duration, isPlaying, user, currentGroup }: { item: any, togglePlayPause: Function, seekAudio: any, progress: any, index: Number, duration: any, isPlaying: Number, user: any, currentGroup: any }) => {
     const formatTime = (timestamp: any) => {
         return new Date(timestamp).toLocaleTimeString("en-GB", {
             hour: "2-digit",
@@ -229,14 +225,19 @@ const SentMessage = ({ item, togglePlayPause, seekAudio, progress, index, durati
             hour12: false,
         });
     };
+    console.log(item)
+    const member = currentGroup.members.find(member => member._id === item.from);
+
     return (
         <View style={{ width: '100%', alignItems: 'flex-end', flexDirection: item.from === user._id ? 'row' : 'row-reverse', gap: 2, marginVertical: 20 }}>
             {
-                user.image && item.from === user._id ?
-                    <Image source={{ uri: user.image }} style={styles.image} />
-                    : currentFriend.image ? <Image source={{ uri: currentFriend.image }} style={styles.image} /> : <View style={styles.dummy}>
+                member && member.image ? (
+                    <Image source={{ uri: member.image }} style={styles.image} />
+                ) : (
+                    <View style={styles.dummy}>
                         <Ionicons name="person" size={30} style={{ marginTop: 10 }} color="rgb(225 225 225)" />
                     </View>
+                )
             }
             <View>
                 <View style={[styles.message, { borderBottomLeftRadius: item.from === user._id ? 0 : 20, borderBottomRightRadius: item.from === user._id ? 20 : 0, justifyContent: item.from === user._id ? 'flex-start' : 'flex-end', backgroundColor: item.from === user._id ? '#b2b2b2' : '#1877F2' }]}>
@@ -245,7 +246,8 @@ const SentMessage = ({ item, togglePlayPause, seekAudio, progress, index, durati
                         <Pressable onPress={() => togglePlayPause(index, item.mess)} style={{ borderRadius: '100%', borderWidth: 1, borderColor: '#1877F2', width: 10, height: 10 }}>
                             {
                                 isPlaying === index ? <AntDesign name='caretright' size={20} color="#1877F2" /> :
-                                    <AntDesign name='pause' size={20} color="#1877F2" />}
+                                    <AntDesign name='pause' size={20} color="#1877F2" />
+                            }
                         </Pressable>
                         <Slider
                             value={index === progress.index ? progress.position : 0}
@@ -262,7 +264,7 @@ const SentMessage = ({ item, togglePlayPause, seekAudio, progress, index, durati
         </View>
     )
 }
-export default message
+export default groupMessage
 
 const styles = StyleSheet.create({
     inputContainer: {
