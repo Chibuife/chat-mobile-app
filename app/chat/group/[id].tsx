@@ -225,9 +225,7 @@ const SentMessage = ({ item, togglePlayPause, seekAudio, progress, index, durati
             hour12: false,
         });
     };
-    console.log(item)
     const member = currentGroup.members.find(member => member._id === item.from);
-
     return (
         <View style={{ width: '100%', alignItems: 'flex-end', flexDirection: item.from === user._id ? 'row' : 'row-reverse', gap: 2, marginVertical: 20 }}>
             {
@@ -241,9 +239,9 @@ const SentMessage = ({ item, togglePlayPause, seekAudio, progress, index, durati
             }
             <View>
                 <View style={[styles.message, { borderBottomLeftRadius: item.from === user._id ? 0 : 20, borderBottomRightRadius: item.from === user._id ? 20 : 0, justifyContent: item.from === user._id ? 'flex-start' : 'flex-end', backgroundColor: item.from === user._id ? '#b2b2b2' : '#1877F2' }]}>
-                    {item.image && <Image source={{ uri: item.image }} style={{ width: 200, height: 200 }} />}
-                    {item.type === 'audio' && <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-                        <Pressable onPress={() => togglePlayPause(index, item.mess)} style={{ borderRadius: '100%', borderWidth: 1, borderColor: '#1877F2', width: 10, height: 10 }}>
+                    {item.image && <Image source={{ uri: item?.image }} style={{ width: 200, height: 200 }} />}
+                    {item.audio && <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                        <Pressable onPress={() => togglePlayPause(index, item.audio)} style={{ borderRadius: '100%', borderWidth: 1, borderColor: '#1877F2', width: 10, height: 10 }}>
                             {
                                 isPlaying === index ? <AntDesign name='caretright' size={20} color="#1877F2" /> :
                                     <AntDesign name='pause' size={20} color="#1877F2" />

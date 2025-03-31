@@ -9,6 +9,10 @@ const RegisterWithEmail = ({registerUser, userDetails, image}:{registerUser:Func
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(true)
+    function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+      }
     return (
         <View style={styles.container}>
             <View style={{gap:10, width:'100%', alignItems:'center'}}>
@@ -19,14 +23,20 @@ const RegisterWithEmail = ({registerUser, userDetails, image}:{registerUser:Func
                 if(userDetails.lastName ===''|| userDetails.firstName === '' || email ==='' || password === '' ){
                     return alert('please fill up credentialls')
                 }
-                const response = await fetch(image.uri);
-                const blob = await response.blob();
-          
+                if(isValidEmail(email) === false){
+                    return alert('invalid email')
+                }
                 const formData = new FormData();
                 formData.append("email",email);
                 formData.append("password",password);
-                formData.append("profilePicture", blob, image.name);
-                console.log("Selected file:", image)
+                formData.append("lastName",userDetails.lastName);
+                formData.append("firstName",userDetails.firstName);
+
+                if(image){
+                    const response = await fetch(image?.uri);
+                    const blob = await response.blob();
+                    formData.append("profilePicture", blob, image?.name);
+                }
                 console.log([...formData]);
                 registerUser(userDetails,formData)
                 }} />

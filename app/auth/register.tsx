@@ -16,14 +16,12 @@ import * as ImagePicker from 'expo-image-picker';
 import ChatContext from '@/helperFn/RegisterContextApi'
 
 const register = () => {
-    const {  registerUser,  } = useContext(ChatContext);
-    const [registerWith, setRegisterWith] = useState('phone')
+    const {  registerUser, } = useContext(ChatContext);
     const [userDetails, setUserDetails] = useState({
         firstName: '',
         lastName: '',
     })
     const router = useRouter()
-    const [image, setImage] = useState<string | null>(null);
     const [imageFile, setImageFile] = useState()
 
     const pickImage = async () => {
@@ -69,17 +67,21 @@ const register = () => {
                         <Input placeholder={'First Name'} value={userDetails.firstName} func={(text: any) => setUserDetails({ ...userDetails, firstName: text.target.value })} />
                         <Input placeholder={'Last Name'} value={userDetails.lastName} func={(text: any) => setUserDetails({ ...userDetails, lastName: text.target.value })} />
                     </View>
-                    {registerWith === "phone" ? <RegisterWithPhoneNumber /> : <RegisterWithEmail userDetails={userDetails} image={imageFile} registerUser={registerUser} />}
-                    <ThemedText type='default' style={{ marginVertical: 10 }}>OR</ThemedText>
+                    {/* {registerWith === "phone" ?  */}
+                    {/* <RegisterWithPhoneNumber />  */}
+                    {/* // : */}
+                     <RegisterWithEmail userDetails={userDetails} image={imageFile} registerUser={registerUser} />
+                     {/* } */}
+                    {/* <ThemedText type='default' style={{ marginVertical: 10 }}>OR</ThemedText> */}
                     {/* <Button label={'Login With Facebook'} bgcolor="#1877F2" txcolor='white' major={true} func={scrollTo} />
                 <Button bgcolor="black" label={'Sign In With Apple'} txcolor='white' major={true} func={scrollTo} /> */}
-                    {
+                    {/* {
                         registerWith === "phone" ? <TouchableOpacity onPress={() => setRegisterWith('email')}>
                             <ThemedText type='defaultSemiBold' style={{ color: '#1877F2' }}>Sign Up with E-mail</ThemedText>
                         </TouchableOpacity> : <TouchableOpacity onPress={() => setRegisterWith('phone')}>
                             <ThemedText type='defaultSemiBold' style={{ color: '#1877F2' }}>Sign Up with phone number</ThemedText>
                         </TouchableOpacity>
-                    }
+                    } */}
                 </View>
             </ThemedView>
         </SafeAreaView>

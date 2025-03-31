@@ -24,7 +24,6 @@ const creategroup = () => {
     useEffect(()=>{
         groupId?.msg ? router.push(`/chat/group/${groupId.msg}`) : null
     },[groupId])
-    console.log(friends, addMember, groupName, "frie")
     return (
         <View style={{ flex: 1, backgroundColor: 'white' }}>
             {
@@ -46,8 +45,7 @@ const creategroup = () => {
             <FlatList
                 data={friends}
                 renderItem={({ item }) => {
-                    console.log(addMember.includes(item.id))
-                    return (
+                    return !item.members && (
                         <TouchableOpacity style={{ justifyContent: 'space-between', flexDirection: 'row', borderBottomWidth: 1, borderColor: 'rgb(225 225 225)', paddingHorizontal: 5, paddingVertical: 10 }} onPress={() => addMember.includes(item.id) ? setAddMember((prevMembers) => prevMembers.filter(member => member !== item.id)) : setAddMember([...addMember, item.id])} >
                             <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', }}>
                                 {
@@ -68,7 +66,16 @@ const creategroup = () => {
     )
 }
 
-const ModalContainer = ({ setIsVisible, setGroupName, createGroup, addMember, groupName,setGroupId }) => {
+interface ModalConType { 
+    setIsVisible:Function, 
+    setGroupName:Function, 
+    createGroup:String, 
+    addMember:Array<any>,
+    groupName:String,
+    setGroupId:Function
+ }
+
+const ModalContainer = ({ setIsVisible, setGroupName, createGroup, addMember, groupName,setGroupId }:ModalConType) => {
     return (
         <View style={styles.container}>
             <TouchableOpacity onPress={() => setIsVisible(false)} style={styles.container}>
@@ -119,7 +126,6 @@ const styles = StyleSheet.create({
         margin: 20,
         borderWidth: 1,
         borderRadius: 5,
-        outline: 'none',
         backgroundColor: 'white'
     }
 })

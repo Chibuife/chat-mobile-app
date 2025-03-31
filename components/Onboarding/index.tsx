@@ -6,25 +6,26 @@ import Button from '../Button'
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router'
 import { Dimensions } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const OnboardingScreenData = [
   {
     id: '1',
     title: 'Private Messages',
     subText: 'Communicate with your friends via private messages',
-    image: '/'
+    icon: 'notification'
   },
   {
     id: '2',
     title: 'Send Photos & Videos',
     subText: 'Have fun with your friends by sending photos and videos to each other',
-    image: '/'
+    image: 'message'
   },
   {
     id: '3',
     title: 'Get Notified',
     subText: 'Receive notifications when your friends are looking for you',
-    image: '/'
+    image: 'camera'
   },
 ]
 
@@ -52,7 +53,7 @@ const Onboarding = () => {
 
   const viewedOnboarding = async () => {
     try {
-      // await AsyncStorage.setItem('@viewedOboarding', 'true');
+      await AsyncStorage.setItem('@viewedOboarding', 'true');
       router.push('/auth')
     } catch (error) {
       console.log('Error @setItem', error)

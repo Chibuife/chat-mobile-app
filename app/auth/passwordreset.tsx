@@ -17,8 +17,7 @@ const passwordreset = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(true)
     const route = useRoute()
     const router = useRouter()
-    const {token} = route.params
-    console.log(token,'route')
+    const {token} = route.params;
     return (
         <SafeAreaView style={styles.container}>
             <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 20 }}>

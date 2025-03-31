@@ -25,7 +25,6 @@ const message = () => {
     const router = useRouter()
     const { height } = useWindowDimensions()
     const ref = useRef(null)
-    // const [messages, setMessages] = useState<Message[] | undefined>()
     const currentTime = new Date().toLocaleTimeString();
     const [recording, setRecording] = useState<any>(null);
     const [isPlaying, setIsPlaying] = useState<number>(-1);
@@ -37,7 +36,7 @@ const message = () => {
     const progressInterval = useRef<any>(null);
     const route = useRoute();
     const { id } = route.params || {};
-    console.log(id, user, currentFriend, 'id')
+    console.log(id, user, messages, 'id')
     useEffect(() => {
         getFriend(id, setCurrentFriend)
         setTimeout(() => getChatHistory(id), 3000)
@@ -57,8 +56,7 @@ const message = () => {
             aspect: [4, 3],
             quality: 1,
         });
-        // const response = await fetch(result.assets[0].uri);
-        // const blob = await response.blob();
+     
         sendMessage(id, null, result.assets[0].uri)
     };
 
@@ -90,6 +88,7 @@ const message = () => {
             }
         });
     };
+    
     // Play or Pause the audio
     const togglePlayPause = async (index: number, uri: string) => {
 
@@ -154,16 +153,8 @@ const message = () => {
         console.log("Stopping recording...");
         await recording.stopAndUnloadAsync();
         const uri = recording.getURI();
-        // setRecordingUri(uri);
         setRecording(null);
-        // setMessages([
-        //     ...(messages ?? []), {
-        //         mess: uri,
-        //         time: currentTime,
-        //         type: 'audio'
-        //     }
-        // ])
-        console.log("Recording saved at:", uri);
+        sendMessage(id, "", "",uri)
     };
 
 
@@ -240,9 +231,9 @@ const SentMessage = ({ item, togglePlayPause, seekAudio, progress, index, durati
             }
             <View>
                 <View style={[styles.message, { borderBottomLeftRadius: item.from === user._id ? 0 : 20, borderBottomRightRadius: item.from === user._id ? 20 : 0, justifyContent: item.from === user._id ? 'flex-start' : 'flex-end', backgroundColor: item.from === user._id ? '#b2b2b2' : '#1877F2' }]}>
-                    {item.image && <Image source={{ uri: item.image }} style={{ width: 200, height: 200 }} />}
-                    {item.type === 'audio' && <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-                        <Pressable onPress={() => togglePlayPause(index, item.mess)} style={{ borderRadius: '100%', borderWidth: 1, borderColor: '#1877F2', width: 10, height: 10 }}>
+                    {item.image && <Image source={{ uri: item?.image }} style={{ width: 200, height: 200 }} />}
+                    {item.audio && <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                        <Pressable onPress={() => togglePlayPause(index, item.audio)} style={{ borderRadius: '100%', borderWidth: 1, borderColor: '#1877F2', width: 10, height: 10 }}>
                             {
                                 isPlaying === index ? <AntDesign name='caretright' size={20} color="#1877F2" /> :
                                     <AntDesign name='pause' size={20} color="#1877F2" />}
