@@ -11,7 +11,6 @@ import { Audio } from 'expo-av';
 import Slider from "@react-native-community/slider";
 import * as ImagePicker from "expo-image-picker";
 import { Image } from 'react-native'
-// import { sendMessage } from '@/helperFn'
 import ChatContext from '@/helperFn/RegisterContextApi'
 const ws = new WebSocket('ws://localhost:8080');
 
@@ -57,7 +56,7 @@ const message = () => {
             quality: 1,
         });
      
-        sendMessage(id, null, result.assets[0].uri)
+        sendMessage(id, null, result.assets[0].uri,null)
     };
 
     // Load the audio
